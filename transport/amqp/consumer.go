@@ -19,7 +19,7 @@ const (
 )
 
 
-func NewConsumer(amqpURI, exchange, exchangeType, queueName, key, ctag string) (*Consumer, error) {
+func NewConsumer(amqpURI, exchange, exchangeType, queueName, ctag string, keys []string) (*Consumer, error) {
 
   c := &Consumer{
 		conn:    nil,
@@ -71,19 +71,22 @@ func NewConsumer(amqpURI, exchange, exchangeType, queueName, key, ctag string) (
 	if err != nil {
 		return nil, fmt.Errorf("Queue Declare: %s", err)
 	}
+	log.Printf("declared Queue (%q %d messages, %d consumers)", queue.Name, queue.Messages, queue.Consumers)
 
-	log.Printf("declared Queue (%q %d messages, %d consumers), binding to Exchange (key %q)",
-		queue.Name, queue.Messages, queue.Consumers, key)
+	for _,key := range keys {
+		log.Printf("declared Queue (binding to Exchange (keys %q)", key)
 
-	if err = c.channel.QueueBind(
-		queue.Name, // name of the queue
-		key,        // bindingKey
-		exchange,   // sourceExchange
-		false,      // noWait
-		nil,        // arguments
-	); err != nil {
-		return nil, fmt.Errorf("Queue Bind: %s", err)
+		if err = c.channel.QueueBind(
+			queue.Name, // name of the queue
+			key,        // bindingKey
+			exchange,   // sourceExchange
+			false,      // noWait
+			nil,        // arguments
+		); err != nil {
+			return nil, fmt.Errorf("Queue Bind: %s", err)
+		}
 	}
+
 
 	return c, nil
 }
