@@ -91,6 +91,20 @@ func NewConsumer(amqpURI, exchange, exchangeType, queueName, ctag string, keys [
 	return c, nil
 }
 
+func (consumer *Consumer) Shutdown() error {
+	// will close() the deliveries channel
+	if err := consumer.channel.Cancel(consumer.tag, true); err != nil {
+		return fmt.Errorf("Consumer cancel failed: %s", err)
+	}
+
+	if err := consumer.conn.Close(); err != nil {
+		return fmt.Errorf("AMQP connection close error: %s", err)
+	}
+
+	defer log.Printf("AMQP shutdown OK")
+
+	return nil
+}
 
 func (consumer *Consumer) Consume(queue_name string) (<-chan amqp.Delivery, error) {
 
