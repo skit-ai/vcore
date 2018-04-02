@@ -2,6 +2,7 @@ package amqp
 
 import (
 	"log"
+	"fmt"
 
 	"github.com/streadway/amqp"
 )
@@ -84,6 +85,21 @@ func (producer *Producer) Publish(exchange, exchangeType,routingKey, body string
 	}
 
 	return err
+}
+
+func (producer *Producer) Shutdown() error {
+
+	if err := producer.channel.Cancel("", true); err != nil {
+		return fmt.Errorf("Consumer cancel failed: %s", err)
+	}
+
+	if err := producer.conn.Close(); err != nil {
+		return fmt.Errorf("AMQP connection close error: %s", err)
+	}
+
+	defer log.Printf("AMQP Producer shutdown OK")
+
+	return nil
 }
 
 // // One would typically keep a channel of publishings, a sequence number, and a
