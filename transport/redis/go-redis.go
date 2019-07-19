@@ -1,23 +1,23 @@
 package redis
 
 import (
-  "os"
-  "fmt"
+	"fmt"
+	"os"
 
-  "github.com/go-redis/redis"
+	"github.com/go-redis/redis"
 )
 
-type GoRedisClient struct{
-  *redis.Client
+type GoRedisClient struct {
+	*redis.Client
 }
 
 var (
-  RedisClient *GoRedisClient
+	RedisClient *GoRedisClient
 )
 
-func NewGoRedisClient()(*GoRedisClient) {
-  redisClient := redis.NewClient(&redis.Options{
-		Addr:     fmt.Sprintf("%v:%v", os.Getenv("REDIS_REMOTE_HOST"), os.Getenv("REDIS_REMOTE_PORT")),
+func NewGoRedisClient() *GoRedisClient {
+	redisClient := redis.NewClient(&redis.Options{
+		Addr: fmt.Sprintf("%v:%v", os.Getenv("REDIS_REMOTE_HOST"), os.Getenv("REDIS_REMOTE_PORT")),
 	})
-  return &GoRedisClient{redisClient}
+	return &GoRedisClient{redisClient}
 }

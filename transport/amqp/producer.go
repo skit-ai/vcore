@@ -1,8 +1,8 @@
 package amqp
 
 import (
-	"log"
 	"fmt"
+	"log"
 
 	"github.com/streadway/amqp"
 )
@@ -15,9 +15,9 @@ type Producer struct {
 func NewProducer(amqpURI, exchange, exchangeType string) (*Producer, error) {
 
 	producer := &Producer{
-			conn:    nil,
-			channel: nil,
-		}
+		conn:    nil,
+		channel: nil,
+	}
 
 	var err error
 
@@ -47,10 +47,10 @@ func NewProducer(amqpURI, exchange, exchangeType string) (*Producer, error) {
 		log.Fatalf("Exchange Declare: %s", err)
 	}
 
-	return producer,err
+	return producer, err
 }
 
-func (producer *Producer) Publish(exchange, exchangeType,routingKey, body string, headers amqp.Table,reliable bool) error {
+func (producer *Producer) Publish(exchange, exchangeType, routingKey, body string, headers amqp.Table, reliable bool) error {
 	// Reliable publisher confirms require confirm.select support from the
 	// connection.
 	if reliable {
@@ -77,7 +77,7 @@ func (producer *Producer) Publish(exchange, exchangeType,routingKey, body string
 			ContentEncoding: "",
 			Body:            []byte(body),
 			DeliveryMode:    amqp.Persistent, // 1=non-persistent, 2=persistent
-			Priority:        0,              // 0-9
+			Priority:        0,               // 0-9
 			// a bunch of application/implementation-specific fields
 		},
 	); err != nil {

@@ -15,17 +15,16 @@ type Consumer struct {
 }
 
 const (
-  ExchangeTopic string = amqp.ExchangeTopic
+	ExchangeTopic string = amqp.ExchangeTopic
 )
-
 
 func NewConsumer(amqpURI, exchange, exchangeType, queueName, ctag string, keys []string) (*Consumer, error) {
 
-  c := &Consumer{
+	c := &Consumer{
 		conn:    nil,
 		channel: nil,
 		tag:     ctag,
-//		done:    make(chan error),
+		//		done:    make(chan error),
 	}
 
 	var err error
@@ -73,7 +72,7 @@ func NewConsumer(amqpURI, exchange, exchangeType, queueName, ctag string, keys [
 	}
 	log.Printf("declared Queue (%q %d messages, %d consumers)", queue.Name, queue.Messages, queue.Consumers)
 
-	for _,key := range keys {
+	for _, key := range keys {
 		log.Printf("declared Queue (binding to Exchange (keys %q)", key)
 
 		if err = c.channel.QueueBind(
@@ -86,7 +85,6 @@ func NewConsumer(amqpURI, exchange, exchangeType, queueName, ctag string, keys [
 			return nil, fmt.Errorf("Queue Bind: %s", err)
 		}
 	}
-
 
 	return c, nil
 }
@@ -108,19 +106,19 @@ func (consumer *Consumer) Shutdown() error {
 
 func (consumer *Consumer) Consume(queue_name string) (<-chan amqp.Delivery, error) {
 
-  log.Printf("starting Consume on queue %q (consumer tag %q)", queue_name,consumer.tag)
-  deliveries, err := consumer.channel.Consume(
-    queue_name, // name
-    consumer.tag,      // consumerTag,
-    true,         // auto-ack
+	log.Printf("starting Consume on queue %q (consumer tag %q)", queue_name, consumer.tag)
+	deliveries, err := consumer.channel.Consume(
+		queue_name,   // name
+		consumer.tag, // consumerTag,
+		true,         // auto-ack
 		false,        // exclusive
 		false,        // no-local
 		false,        // no-wait
 		nil,          // args
-  )
-  if err != nil {
-    return deliveries, fmt.Errorf("Queue Consume: %s", err)
-  }
+	)
+	if err != nil {
+		return deliveries, fmt.Errorf("Queue Consume: %s", err)
+	}
 
-  return deliveries, err
+	return deliveries, err
 }
