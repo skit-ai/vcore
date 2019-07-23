@@ -20,7 +20,7 @@ var (
 func NewRadixRedisClient() *RadixRedisClient {
 	redisClient, err := redis.Dial("tcp", fmt.Sprintf("%v:%v", os.Getenv("REDIS_REMOTE_HOST"), os.Getenv("REDIS_REMOTE_PORT")))
 	if err != nil {
-		log.Fatalf("%s", err)
+		log.Printf("%s", err)
 	}
 	return &RadixRedisClient{redisClient}
 }

@@ -8,7 +8,7 @@
 // AMQP Producer - Initialize and connect
 producer, err := amqp.NewProducer(*uri, *exchange, *exchangeType)
 if err != nil {
-  log.Fatalf("%s", err)
+  log.Printf("%s", err)
 }
 // AMQP Producer - Close connection
 defer producer.Shutdown()
@@ -24,7 +24,7 @@ producer.Publish(*exchange, *exchangeType, routing_key, body, headers, false)
 // AMQP Consumer - Initialize and connect
 consumer, err := amqp.NewConsumer(*uri, *exchange, *exchangeType, *queue, *consumerTag,<array of bindingKey strings>)
 if err != nil {
-  log.Fatalf("%s", err)
+  log.Printf("%s", err)
 }
 // AMQP Consumer - Close connection
 defer consumer.Shutdown()

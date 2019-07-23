@@ -12,6 +12,10 @@ type Producer struct {
 	channel *amqp.Channel
 }
 
+var (
+	ProducerClient *Producer
+)
+
 func NewProducer(amqpURI, exchange, exchangeType string) (*Producer, error) {
 
 	producer := &Producer{
@@ -24,14 +28,15 @@ func NewProducer(amqpURI, exchange, exchangeType string) (*Producer, error) {
 	log.Printf("dialing %q", amqpURI)
 	producer.conn, err = amqp.Dial(amqpURI)
 	if err != nil {
-		log.Fatalf("Dial: %s", err)
+		log.Printf("Dial: %s", err)
+		return nil, err
 	}
-	//defer connection.Close()
 
 	log.Printf("got Connection, getting Channel")
 	producer.channel, err = producer.conn.Channel()
 	if err != nil {
-		log.Fatalf("Channel: %s", err)
+		log.Printf("Channel: %s", err)
+		return nil, err
 	}
 
 	log.Printf("got Channel, declaring %q Exchange (%q)", exchangeType, exchange)
@@ -44,10 +49,11 @@ func NewProducer(amqpURI, exchange, exchangeType string) (*Producer, error) {
 		false,        // noWait
 		nil,          // arguments
 	); err != nil {
-		log.Fatalf("Exchange Declare: %s", err)
+		log.Printf("Exchange Declare: %s", err)
+		return nil, err
 	}
 
-	return producer, err
+	return producer, nil
 }
 
 func (producer *Producer) Publish(exchange, exchangeType, routingKey, body string, headers amqp.Table, reliable bool) error {
@@ -56,7 +62,7 @@ func (producer *Producer) Publish(exchange, exchangeType, routingKey, body strin
 	if reliable {
 		// log.Printf("enabling publishing confirms.")
 		// if err := channel.Confirm(false); err != nil {
-		// 	return log.Fatalf("Channel could not be put into confirm mode: %s", err)
+		// 	return log.Printf("Channel could not be put into confirm mode: %s", err)
 		// }
 		//
 		// confirms := channel.NotifyPublish(make(chan amqp.Confirmation, 1))
@@ -81,7 +87,7 @@ func (producer *Producer) Publish(exchange, exchangeType, routingKey, body strin
 			// a bunch of application/implementation-specific fields
 		},
 	); err != nil {
-		log.Fatalf("Exchange Publish: %s", err)
+		log.Printf("Exchange Publish: %s", err)
 	}
 
 	return err
