@@ -16,11 +16,11 @@ var (
 	Client *RadixRedisClient
 )
 
-//TODO: Redis reconnection
-func NewRadixRedisClient() *RadixRedisClient {
+func NewRadixRedisClient() (*RadixRedisClient, error) {
 	redisClient, err := redis.Dial("tcp", fmt.Sprintf("%v:%v", os.Getenv("REDIS_REMOTE_HOST"), os.Getenv("REDIS_REMOTE_PORT")))
 	if err != nil {
 		log.Printf("%s", err)
+		return nil, err
 	}
-	return &RadixRedisClient{redisClient}
+	return &RadixRedisClient{redisClient}, nil
 }
