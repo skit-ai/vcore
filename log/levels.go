@@ -5,7 +5,6 @@ import (
 	"log"
 	"strings"
 	"vcore/errors"
-	"vcore/utils"
 )
 
 const (
@@ -63,7 +62,7 @@ func (logger *Logger) SetLevel(level int) {
 		defaultLogger.level = level
 	} else {
 		_format := "Cannot set log level to %d. Log levels allowed are %s. Default log level is %d(WARN)"
-		logger.Warnf(_format, level, utils.JoinInt(",", []int{TRACE, DEBUG, INFO, WARN, ERROR}), WARN)
+		logger.Warnf(_format, level, joinInt(",", []int{TRACE, DEBUG, INFO, WARN, ERROR}), WARN)
 	}
 }
 
@@ -241,6 +240,18 @@ func repeat(s string, x int) string {
 		} else {
 			builder.WriteString(s)
 			builder.WriteString(" ")
+		}
+	}
+	return builder.String()
+}
+
+// Concatenates a variable slice of strings
+func joinInt(delimiter string, slice []int) string {
+	var builder strings.Builder
+	for i, item := range slice {
+		builder.WriteString(fmt.Sprintf("%v", item))
+		if i != len(slice)-1 {
+			builder.WriteString(delimiter)
 		}
 	}
 	return builder.String()
