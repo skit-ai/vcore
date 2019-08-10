@@ -4,6 +4,7 @@ import (
 	"github.com/getsentry/raven-go"
 	"os"
 	"vcore/errors"
+	"vcore/log"
 )
 
 type Sentry struct {
@@ -36,7 +37,7 @@ func (wrapper *Sentry) Capture(err error, _panic bool) {
 		if _panic {
 			panic(err)
 		} else {
-			errors.PrintStackTrace(err)
+			log.Error(err)
 		}
 
 		if wrapper.client != nil {
