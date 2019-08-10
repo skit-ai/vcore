@@ -95,6 +95,10 @@ func (producer *Producer) Publish(exchange, exchangeType, routingKey, body strin
 
 func (producer *Producer) Shutdown() error {
 
+	if producer == nil{
+		return nil
+	}
+
 	if err := producer.channel.Cancel("", true); err != nil {
 		return fmt.Errorf("Consumer cancel failed: %s", err)
 	}
