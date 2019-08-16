@@ -5,8 +5,8 @@ import (
 	"encoding/json"
 	"fmt"
 	"reflect"
-	"vcore/errors"
-	"vcore/surveillance"
+	"github.com/Vernacular-ai/vcore/errors"
+	"github.com/Vernacular-ai/vcore/surveillance"
 )
 
 // Returns the formatted value of the JSON field based on the expectations of the target driver

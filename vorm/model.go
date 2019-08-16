@@ -4,11 +4,11 @@ import (
 	"fmt"
 	"os"
 	"strconv"
-	"vcore/errors"
+	"github.com/Vernacular-ai/vcore/errors"
 
-	"github.com/misterEggroll/gorm"
-	_ "github.com/misterEggroll/gorm/dialects/oci8"
-	_ "github.com/misterEggroll/gorm/dialects/postgres"
+	"github.com/Vernacular-ai/gorm"
+	_ "github.com/Vernacular-ai/gorm/dialects/oci8"
+	_ "github.com/Vernacular-ai/gorm/dialects/postgres"
 )
 
 const (

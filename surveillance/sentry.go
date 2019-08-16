@@ -5,8 +5,8 @@ import (
 	"github.com/getsentry/sentry-go/http"
 	"net/http"
 	"os"
-	"vcore/errors"
-	"vcore/log"
+	"github.com/Vernacular-ai/vcore/errors"
+	"github.com/Vernacular-ai/vcore/log"
 )
 
 type Sentry struct {

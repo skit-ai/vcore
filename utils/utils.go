@@ -20,8 +20,8 @@ import (
 	"strconv"
 	"strings"
 	"time"
-	"vcore/errors"
-	"vcore/surveillance"
+	"github.com/Vernacular-ai/vcore/errors"
+	"github.com/Vernacular-ai/vcore/surveillance"
 
 	"github.com/google/go-cmp/cmp"
 	"gopkg.in/yaml.v2"

@@ -4,7 +4,7 @@ import (
 	"fmt"
 	"log"
 	"strings"
-	"vcore/errors"
+	"github.com/Vernacular-ai/vcore/errors"
 )
 
 const (
