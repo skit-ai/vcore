@@ -193,6 +193,9 @@ func evaluate(templateText string, metadata map[string]interface{}, funcMap temp
 		"month": func(datetime time.Time) int {
 			return int(datetime.Month())
 		},
+		"prettyMonth": func(datetime time.Time) string {
+			return datetime.Month().String()
+		},
 		"day": func(datetime time.Time) int {
 			return datetime.Day()
 		},
