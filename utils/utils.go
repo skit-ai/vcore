@@ -124,149 +124,22 @@ func Evaluate(templateText string, metadata map[string]interface{}) string {
 
 // Recursively resolve all HTML template expressions
 func evaluate(templateText string, metadata map[string]interface{}, funcMap template.FuncMap) string {
-	// func to support increment of number in text/template
-	// https://stackoverflow.com/a/25690905/3464052
-	defaultFuncMap := template.FuncMap{
-		"inc": func(i int) int {
-			return i + 1
-		},
-		"lastElement": func(i int, len int) bool {
-			return i+1 < len
-		},
-		"listContains": func(a string, list []interface{}) bool {
-			for _, b := range list {
-				if b == a {
-					return true
-				}
-			}
-			return false
-		},
-		"strEquals": func(a string, b string) bool {
-			return a == b
-		},
-		"sub": func(a, b int) int {
-			return a - b
-		},
-		"mul": func(a, b float64) float64 {
-			return a * b
-		},
-		"add": func(a, b int) int {
-			return a + b
-		},
-		"int": func(x interface{}) int {
-			if val, ok := x.(int); ok {
-				return val
-			} else if val, ok := x.(float64); ok {
-				return int(val)
-			} else if val, ok := x.(float32); ok {
-				return int(val)
-			} else {
-				return -1
-			}
-		},
-		"list": func(strList, delimiter string) (res []interface{}) {
-			for _, val := range strings.Split(strList, delimiter) {
-				res = append(res, val)
-			}
-			return
-		},
-		"now": func() time.Time {
-			return time.Now()
-		},
-		"dayAfterTomorrow": func() time.Time {
-			return time.Now().Add(time.Duration(48) * time.Hour)
-		},
-		"tomorrow": func() time.Time {
-			return time.Now().Add(time.Duration(24) * time.Hour)
-		},
-		"iso": func(datetime time.Time) string {
-			isoFormat := "2006-01-02T15:04:05-07:00"
-			return datetime.Format(isoFormat)
-		},
-		"unescapedIso": func(datetime time.Time) template.HTML {
-			isoFormat := "2006-01-02T15:04:05-07:00"
-			return template.HTML(datetime.Format(isoFormat))
-		},
-		"year": func(datetime time.Time) int {
-			return datetime.Year()
-		},
-		"month": func(datetime time.Time) int {
-			return int(datetime.Month())
-		},
-		"prettyMonth": func(datetime time.Time) string {
-			return datetime.Month().String()
-		},
-		"day": func(datetime time.Time) int {
-			return datetime.Day()
-		},
-		"hour": func(datetime time.Time) int {
-			return datetime.Hour()
-		},
-		"min": func(datetime time.Time) int {
-			return datetime.Minute()
-		},
-		"sec": func(datetime time.Time) int {
-			return datetime.Second()
-		},
-		"replace": func(datetime time.Time, components string) time.Time {
-			hour := datetime.Hour()
-			min := datetime.Minute()
-			sec := datetime.Second()
-			day := datetime.Day()
-			month := datetime.Month()
-			year := datetime.Year()
-			args := strings.Split(components, ",")
-			for _, val := range args {
-				if strings.Contains(val, "hour") {
-					if v, err := strconv.Atoi(strings.Split(val, "=")[1]); err == nil {
-						hour = v
-					}
-				} else if strings.Contains(val, "min") {
-					if v, err := strconv.Atoi(strings.Split(val, "=")[1]); err == nil {
-						min = v
-					}
-				} else if strings.Contains(val, "sec") {
-					if v, err := strconv.Atoi(strings.Split(val, "=")[1]); err == nil {
-						sec = v
-					}
-				} else if strings.Contains(val, "day") {
-					if v, err := strconv.Atoi(strings.Split(val, "=")[1]); err == nil {
-						day = v
-					}
-				} else if strings.Contains(val, "month") {
-					if v, err := strconv.Atoi(strings.Split(val, "=")[1]); err == nil {
-						month = time.Month(v)
-					}
-				} else if strings.Contains(val, "year") {
-					if v, err := strconv.Atoi(strings.Split(val, "=")[1]); err == nil {
-						year = v
-					}
-				}
-			}
-			return time.Date(year, month, day, hour, min, sec, 0, datetime.Location())
-		},
-		"unescape": func(str string) template.HTML {
-			return template.HTML(str)
-		},
-		"concat": Concat,
-	}
-
 	text := templateText
 	prevText := ""
 	// Keep attempting to evaluate the expression as long as the no. of expressions reduces
 	// This will result in the func recursively resolving all nested expressions until there are no more that can
 	// be resolved
+	var err error
+	var tmpl *template.Template
 	for text != prevText {
 		prevText = text
 
-		if funcMap != nil {
-			// add additional functions to default func map
-			for k, v := range funcMap {
-				defaultFuncMap[k] = v
-			}
+		if funcMap != nil{
+			tmpl, err = template.New("tts_dynamic").Funcs(funcMap).Parse(text)
+		} else {
+			tmpl, err = template.New("tts_dynamic").Parse(text)
 		}
 
-		tmpl, err := template.New("tts_dynamic").Funcs(defaultFuncMap).Parse(text)
 		if err != nil {
 			errors.PrintStackTrace(err)
 			break
