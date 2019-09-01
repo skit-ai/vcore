@@ -55,3 +55,47 @@ log.Tracef("Headers: %s", headers)
 customLogger := log.Logger{log.DEBUG}
 customLogger.Debug("This is a debug message")
 ```
+## errors
+
+The errors package is a wrapper around the brilliant [pkg/errors](https://github.com/pkg/errors) library.
+The major difference between [pkg/errors](https://github.com/pkg/errors) and this library is support for the following:
+* Wrapping of an error into a custom error so as to add a stacktrace.
+* Allows creation of errors with a stack which have no cause(nil cause).
+* Every error created supports the `fatality` interface which is meant to inform us if the error is fatal or not.
+* Every error created supports the `tagged` interface which returns any tags(`map[string]string`) associated with an error.
+* The stacktrace of the error will return the stactrace starting from the deepest cause.
+
+### Basic Usage
+
+#### Create Error without cause:
+This error is non-fatal. As marked by the last bool flag.
+```go
+errors.NewError("Error without a cause", nil, false)
+```
+#### Create Error with a cause:
+```go
+cause := errors.NewError("Error without a cause", nil, false)
+errWithCause := errors.NewError("Error with a cause", cause, false)
+```
+
+#### Check if an error is fatal
+```go
+cause := errors.NewError("Error without a cause", nil, false)
+if cause.Fatal{
+    fmt.Println("This error is fatal.")
+}
+```
+#### Get the stacktrace of the error and print it:
+```go
+cause := errors.NewError("Error without a cause", nil, false)
+errWithCause := errors.NewError("Error with a cause", cause, false)
+fmt.Println(errWithCause.Stacktrace())
+```
+
+Alternatively,
+
+```go
+cause := errors.NewError("Error without a cause", nil, false)
+errWithCause := errors.NewError("Error with a cause", cause, false)
+errWithCause.PrintStackTrace()
+```
