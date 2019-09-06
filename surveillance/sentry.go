@@ -24,6 +24,7 @@ func initSentry() (client *Sentry) {
 
 			// Enable debugging to check connectivity
 			//Debug: true,
+			Environment: os.Getenv("ENVIRONMENT"),
 		}); err != nil {
 			log.Warnf("Could not initialize sentry with DSN: %s", dsn)
 			client = &Sentry{nil, nil}
