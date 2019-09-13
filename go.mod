@@ -5,7 +5,9 @@ go 1.12
 require (
 	github.com/Vernacular-ai/gorm v1.9.11
 	github.com/getsentry/sentry-go v0.2.1
+	github.com/google/btree v1.0.0 // indirect
 	github.com/google/go-cmp v0.3.1
+	github.com/hashicorp/go-getter v1.4.0
 	github.com/mediocregopher/radix.v2 v0.0.0-20181115013041-b67df6e626f9
 	github.com/newrelic/go-agent v2.10.0+incompatible
 	github.com/pkg/errors v0.8.1
