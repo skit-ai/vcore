@@ -2,29 +2,25 @@
 package utils
 
 import (
-	"bufio"
 	"bytes"
 	"crypto/md5"
-	"encoding/csv"
 	"encoding/json"
 	"fmt"
 	"html/template"
 	"io"
-	"io/ioutil"
 	"log"
 	"math"
-	"os"
 	"reflect"
 	"regexp"
 	"runtime"
 	"strconv"
 	"strings"
 	"time"
+
 	"github.com/Vernacular-ai/vcore/errors"
 	"github.com/Vernacular-ai/vcore/surveillance"
 
 	"github.com/google/go-cmp/cmp"
-	"gopkg.in/yaml.v2"
 )
 
 var link = regexp.MustCompile("(^[A-Za-z])|_([A-Za-z])")
@@ -91,32 +87,6 @@ func StringToTimestamp(unixTimestamp string) (time.Time, error) {
 	return time.Unix(int64(sec), int64(dec*(1e9))), nil
 }
 
-// ReadCsvFile -
-func ReadCsvFile(filePath string) ([][]string, error) {
-	// Load a csv file.
-	f, _ := os.Open(filePath)
-
-	// Create a new reader.
-	r := csv.NewReader(bufio.NewReader(f))
-	records, err := r.ReadAll()
-
-	return records, err
-}
-
-// ReadYamlFile -
-func ReadYamlFile(filePath string, out interface{}) (err error) {
-	var yamlFile []byte
-	if yamlFile, err = ioutil.ReadFile(filePath); err != nil {
-		err = errors.NewError("Unable to read "+filePath, err, true)
-	} else {
-		if _err := yaml.Unmarshal(yamlFile, out); _err != nil {
-			err = errors.NewError("Unable to deserialize "+filePath+" into a struct - ", _err, true)
-		}
-	}
-
-	return err
-}
-
 // Evaluate ...
 func Evaluate(templateText string, metadata map[string]interface{}) string {
 	return evaluate(templateText, metadata, nil)
@@ -134,7 +104,7 @@ func evaluate(templateText string, metadata map[string]interface{}, funcMap temp
 	for text != prevText {
 		prevText = text
 
-		if funcMap != nil{
+		if funcMap != nil {
 			tmpl, err = template.New("tts_dynamic").Funcs(funcMap).Parse(text)
 		} else {
 			tmpl, err = template.New("tts_dynamic").Parse(text)
