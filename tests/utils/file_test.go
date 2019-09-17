@@ -10,5 +10,8 @@ import (
 func TestWriteToFile(t *testing.T) {
 	log.SetLevel(log.DEBUG)
 	text := []byte(`Hello World!!`)
-	utils.WriteToFile(text, "test.txt")
+
+	if _, err := utils.WriteToFile(text, "test.txt"); err != nil {
+		t.Error(err)
+	}
 }

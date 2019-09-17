@@ -16,21 +16,27 @@ import (
 )
 
 // WriteToFile - Create directories/file and write to it
-func WriteToFile(stream []byte, toFile string) *os.File {
-
-	var file *os.File
+func WriteToFile(stream []byte, toFile string) (file *os.File, err error) {
 
 	// Check if file exists
-	var _, err = os.Stat(toFile)
+	_, err = os.Stat(toFile)
 
 	// Create file if not exists
 	if os.IsNotExist(err) {
 		log.Debugf("Creating file: %s", toFile)
 		os.MkdirAll(filepath.Dir(toFile), os.ModePerm)
-		file, _ = os.Create(toFile)
+		file, err = os.Create(toFile)
+		if err != nil {
+			err = errors.NewError("Unable to create file", err, false)
+			return
+		}
 		defer file.Close()
 	} else {
-		file, _ = os.OpenFile(toFile, os.O_APPEND|os.O_WRONLY, os.ModePerm)
+		file, err = os.OpenFile(toFile, os.O_APPEND|os.O_WRONLY, os.ModePerm)
+		if err != nil {
+			err = errors.NewError("Unable to open file", err, false)
+			return
+		}
 		defer file.Close()
 	}
 
@@ -40,7 +46,7 @@ func WriteToFile(stream []byte, toFile string) *os.File {
 	file.Sync()
 	log.Debugf("Written to file: %s", toFile)
 
-	return nil
+	return
 }
 
 // GetFile - Download file from URL, create directories/file and write to it
