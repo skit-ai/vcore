@@ -2,24 +2,20 @@ package redis
 
 import (
 	"fmt"
-	"log"
 	"os"
 
 	"github.com/mediocregopher/radix.v2/redis"
 )
 
+// RadixRedisClient - Redis client
 type RadixRedisClient struct {
 	*redis.Client
 }
 
-var (
-	Client *RadixRedisClient
-)
-
+// NewRadixRedisClient - Return a redis client
 func NewRadixRedisClient() (*RadixRedisClient, error) {
 	redisClient, err := redis.Dial("tcp", fmt.Sprintf("%v:%v", os.Getenv("REDIS_REMOTE_HOST"), os.Getenv("REDIS_REMOTE_PORT")))
 	if err != nil {
-		log.Printf("%s", err)
 		return nil, err
 	}
 	return &RadixRedisClient{redisClient}, nil
