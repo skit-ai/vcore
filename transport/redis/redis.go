@@ -7,6 +7,11 @@ import (
 	"github.com/mediocregopher/radix.v2/redis"
 )
 
+var (
+	// Client - Redis client
+	Client *RadixRedisClient
+)
+
 // RadixRedisClient - Redis client
 type RadixRedisClient struct {
 	*redis.Client
