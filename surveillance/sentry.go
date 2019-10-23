@@ -104,3 +104,15 @@ func (wrapper *Sentry) HandleFunc(handler http.HandlerFunc) http.HandlerFunc {
 		return handler
 	}
 }
+
+// Wrapper over sentry-go/http#HandleFunc
+// Only calls the sentry handler if sentry was successfully initialized
+func (wrapper *Sentry) HandleHttpRouter(handler httprouter.Handle) httprouter.Handle {
+	if wrapper.handler != nil {
+		// If the sentry handler was initialized, call it's HandleFunc function
+		return wrapper.handler.HandleHttpRouter(handler)
+	} else {
+		// Simply return the handler in case the sentry handler was not initialized
+		return handler
+	}
+}
