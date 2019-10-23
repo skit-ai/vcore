@@ -1,17 +1,19 @@
 package surveillance
 
 import (
-	"github.com/getsentry/sentry-go"
-	"github.com/getsentry/sentry-go/http"
-	"net/http"
-	"os"
 	"github.com/Vernacular-ai/vcore/errors"
 	"github.com/Vernacular-ai/vcore/log"
+	sentryWrapper "github.com/Vernacular-ai/vcore/sentry"
+	"github.com/getsentry/sentry-go"
+	"github.com/getsentry/sentry-go/http"
+	"github.com/julienschmidt/httprouter"
+	"net/http"
+	"os"
 )
 
 type Sentry struct {
 	client  *sentry.Client
-	handler *sentryhttp.Handler
+	handler *sentryWrapper.Handler
 }
 
 func initSentry() (client *Sentry) {
@@ -31,7 +33,7 @@ func initSentry() (client *Sentry) {
 		} else {
 			client = &Sentry{
 				sentry.CurrentHub().Client(),
-				sentryhttp.New(sentryhttp.Options{Repanic: true}),
+				sentryWrapper.New(sentryhttp.Options{Repanic: true}),
 			}
 		}
 	} else {
