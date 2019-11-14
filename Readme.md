@@ -1,6 +1,8 @@
 # vcore
 
-## errors
+Golang Common utility functions
+
+## vcore/errors
 
 The errors package is a wrapper around the brilliant [pkg/errors](https://github.com/pkg/errors) library.
 The major difference between [pkg/errors](https://github.com/pkg/errors) and this library is support for the following:
@@ -53,8 +55,7 @@ errWithCause := errors.NewError("Error with a cause", cause, false)
 errWithCause.PrintStackTrace()
 ```
 
-
-## log
+## vcore/log
 
 The log package is a basic wrapper on the standard log package  in Go's stdlib.
 The log package logs to STDOUT and supports log levels(`int`).
@@ -112,6 +113,13 @@ customLogger := log.Logger{log.DEBUG}
 customLogger.Debug("This is a debug message")
 ```
 
-## utils
+## vcore/transport
 
-The utils package containes basic utility functions and file utilies for downloading, reading and writing to files.
+### vcore/transport/amqp
+### vcore/transport/redis
+
+## vcore/utils
+
+The vcore/utils package contains basic utility functions and file utilies for downloading, reading and writing to files.
+
+## vcore/vorm
