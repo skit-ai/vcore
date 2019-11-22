@@ -186,3 +186,22 @@ func Tags(err error) (cumulativeTags map[string]string) {
 
 	return
 }
+
+// Finds the deepest non-nil cause
+func DeepestCause(err error) error {
+	var cause causer
+	var ok bool
+	for err != nil {
+		if cause, ok = err.(causer); !ok {
+			// Since there is no cause of the current error, it is the root error(original error) that caused the issue
+			// in the first place. Hence breaking the loop.
+			return err
+		}
+		if cause.Cause() != nil {
+			err = cause.Cause()
+		} else {
+			break
+		}
+	}
+	return err
+}
