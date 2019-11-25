@@ -2,11 +2,12 @@ package vorm
 
 import (
 	"fmt"
+	"github.com/Vernacular-ai/vcore/errors"
 	"os"
 	"strconv"
-	"github.com/Vernacular-ai/vcore/errors"
 
 	"github.com/Vernacular-ai/gorm"
+	_ "github.com/Vernacular-ai/gorm/dialects/mysql"
 	_ "github.com/Vernacular-ai/gorm/dialects/oci8"
 	_ "github.com/Vernacular-ai/gorm/dialects/postgres"
 )
@@ -14,6 +15,7 @@ import (
 const (
 	PostgresDriver = "postgres"
 	OracleDriver   = "oci8"
+	MySQLDriver    = "mysql"
 )
 
 type Model struct {
@@ -31,6 +33,8 @@ func InitDB(dataSourceName string) (*Model, error) {
 		return InitPostgresDB(dataSourceName)
 	case OracleDriver:
 		return InitOracleDB(dataSourceName)
+	case MySQLDriver:
+		return InitMySQLDB(dataSourceName)
 	default:
 		return nil, errors.NewError(fmt.Sprintf("Driver `%s` not supported.", driver), nil, true)
 	}
@@ -42,6 +46,10 @@ func InitPostgresDB(dataSourceName string) (*Model, error) {
 
 func InitOracleDB(dataSourceName string) (*Model, error) {
 	return initDBInternal(OracleDriver, dataSourceName)
+}
+
+func InitMySQLDB(dataSourceName string) (*Model, error) {
+	return initDBInternal(MySQLDriver, dataSourceName)
 }
 
 func initDBInternal(dialect string, dataSourceName string) (*Model, error) {

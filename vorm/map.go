@@ -4,9 +4,9 @@ import (
 	"database/sql/driver"
 	"encoding/json"
 	"fmt"
-	"reflect"
 	"github.com/Vernacular-ai/vcore/errors"
 	"github.com/Vernacular-ai/vcore/surveillance"
+	"reflect"
 )
 
 // Returns the formatted value of the JSON field based on the expectations of the target driver
@@ -15,7 +15,7 @@ func jsonValue(i interface{}) (driver.Value, error) {
 	if DB == nil {
 		return nil, errors.NewError("DB connection has not been initialized", nil, true)
 	} else {
-		// Determing the dialect
+		// Determining the dialect
 		dialect := DB.Dialect().GetName()
 
 		// Convert the jsonValue into bytes
@@ -28,7 +28,7 @@ func jsonValue(i interface{}) (driver.Value, error) {
 		case OracleDriver:
 			// Requires string instead of bytes
 			return string(b), nil
-		case PostgresDriver:
+		case PostgresDriver, MySQLDriver:
 			// Requires bytes
 			return b, nil
 		default:
@@ -51,10 +51,10 @@ func (j *ORMJson) Scan(src interface{}) error {
 	switch source := src.(type) {
 	case string:
 		// Receives interface as a string
-		*j = ORMJson{json.RawMessage([]byte(source))}
+		*j = ORMJson{[]byte(source)}
 	case []byte:
 		// Receives a [] bytes
-		*j = ORMJson{json.RawMessage(source)}
+		*j = ORMJson{source}
 	default:
 		return errors.NewError(fmt.Sprintf("Type `%s` not supported.", reflect.TypeOf(source)), nil, true)
 	}
