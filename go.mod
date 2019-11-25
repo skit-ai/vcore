@@ -3,7 +3,7 @@ module github.com/Vernacular-ai/vcore
 go 1.12
 
 require (
-	github.com/Vernacular-ai/gorm v1.9.11
+	github.com/Vernacular-ai/gorm v1.9.13
 	github.com/erikstmartin/go-testdb v0.0.0-20160219214506-8d10e4a1bae5 // indirect
 	github.com/getsentry/sentry-go v0.2.1
 	github.com/google/go-cmp v0.3.1
