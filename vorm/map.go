@@ -38,7 +38,9 @@ func jsonValue(i interface{}) (driver.Value, error) {
 }
 
 // Use in migrations in case the DB entry is to be made in JSON format
-// Can use JsonbMap or StringListMap to automatically unmarshal from db into the desired data type in the actual code
+// Can use JsonbMap or JsonStringSlice to automatically unmarshal from db into the desired data type in the actual code
+// Currently, all the supported dialects (postgres, oracle, mysql) are written so that ORMJson is assumed to be a
+// json type. If this code is changed, we can use JsonbMap as well.
 type ORMJson struct {
 	json.RawMessage
 }
