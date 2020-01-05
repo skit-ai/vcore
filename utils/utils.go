@@ -127,8 +127,45 @@ func evaluate(templateText string, metadata map[string]interface{}, funcMap temp
 	return text
 }
 
+// Recursively resolve all HTML template expressions
+func evaluateSafely(templateText string, metadata map[string]interface{}, funcMap template.FuncMap) (string, error) {
+	text := templateText
+	prevText := ""
+	// Keep attempting to evaluate the expression as long as the no. of expressions reduces
+	// This will result in the func recursively resolving all nested expressions until there are no more that can
+	// be resolved
+	var err error
+	var tmpl *template.Template
+	for text != prevText {
+		prevText = text
+
+		if funcMap != nil {
+			tmpl, err = template.New("tts_dynamic").Funcs(funcMap).Parse(text)
+		} else {
+			tmpl, err = template.New("tts_dynamic").Parse(text)
+		}
+
+		if err != nil {
+			return text, err
+		} else {
+			var textBytes bytes.Buffer
+			if err := tmpl.Execute(&textBytes, metadata); err != nil {
+				return text, err
+			} else {
+				text = textBytes.String()
+			}
+		}
+	}
+
+	return text, nil
+}
+
 func EvaluateAugmentedFuncMap(templateText string, metadata map[string]interface{}, additionalFuncs template.FuncMap) string {
 	return evaluate(templateText, metadata, additionalFuncs)
+}
+
+func EvaluateAugmentedFuncMapSafely(templateText string, metadata map[string]interface{}, additionalFuncs template.FuncMap) (string, error) {
+	return evaluateSafely(templateText, metadata, additionalFuncs)
 }
 
 // TrimSuffix - To trim a suffix string
