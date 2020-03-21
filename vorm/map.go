@@ -5,6 +5,7 @@ import (
 	"encoding/json"
 	"fmt"
 	"github.com/Vernacular-ai/vcore/errors"
+	"github.com/Vernacular-ai/vcore/log"
 	"github.com/Vernacular-ai/vcore/surveillance"
 	"reflect"
 )
@@ -134,4 +135,27 @@ func (p *JsonbMap) setValue(bytes []byte) (err error) {
 		*p = i
 	}
 	return
+}
+
+// Truncate the map if it exceeds the byte size of the target DB
+func (p *JsonbMap) Truncate() {
+	byteLimit := DB.Dialect().GetByteLimit()
+	if byteLimit != -1 {
+		if val, err := p.Value(); err == nil {
+			var length int
+			switch v := val.(type) {
+			case string:
+				length = len([]byte(v))
+			case []byte:
+				length = len(v)
+			}
+			if length >= byteLimit {
+				log.Tracef("Truncating debug metadata due to byte limit exceeding %v", byteLimit)
+				*p = map[string]interface{}{}
+			}
+		} else {
+			log.Tracef("Truncating debug metadata due to inability to determine Value")
+			*p = map[string]interface{}{}
+		}
+	}
 }
