@@ -60,6 +60,7 @@ type rung struct {
 	cause error
 	fatal bool
 	tags  map[string]string
+	extras map[string]interface{}
 }
 
 func (e *rung) Error() (errorMsg string) {
@@ -86,6 +87,10 @@ func (e *rung) Tags() map[string]string {
 	return e.tags
 }
 
+func (e *rung) Extras() map[string]interface{} {
+	return e.extras
+}
+
 // Creates an error which is chained with a cause
 func NewError(_msg string, _cause error, _fatal bool) error {
 	return NewErrorWithTags(_msg, _cause, _fatal, nil)
@@ -98,6 +103,18 @@ func NewErrorWithTags(_msg string, _cause error, _fatal bool, _tags map[string]s
 		msg:   _msg,
 		fatal: _fatal,
 		tags:  _tags,
+	}
+	return _err.WithStack(err)
+}
+
+// Creates an error which is chained with a cause
+func NewErrorWithExtras(_msg string, _cause error, _fatal bool, _extras map[string]string) error {
+	err := &rung{
+		cause:  _cause,
+		msg:    _msg,
+		fatal:  _fatal,
+		tags:   nil,
+		extras: _extras,
 	}
 	return _err.WithStack(err)
 }
@@ -168,6 +185,42 @@ func Tags(err error) (cumulativeTags map[string]string) {
 					// The highest error in the stack overrides the tag value set by the lower error in the stack
 					if _, exists := cumulativeTags[k]; !exists {
 						cumulativeTags[k] = v
+					}
+				}
+			}
+		}
+
+		// Going to the cause of the current error(if any)
+		cause, ok := err.(causer)
+		if !ok {
+			// Since there is no cause of the current error, it is the root error(original error) that caused the issue
+			// in the first place. Hence breaking the loop.
+			break
+		}
+
+		err = cause.Cause()
+	}
+
+	return
+}
+
+func Extras(err error) (cumulativeExtras map[string]interface{}) {
+	type extra interface {
+		Extras() map[string]interface{}
+	}
+
+	// Keep going through all the errors in the stack and make a cumulative map of all the tags
+	for err != nil {
+		if check, ok := err.(extra); ok {
+			extrasSet := check.Extras()
+			if extrasSet != nil {
+				for k, v := range extrasSet {
+					if cumulativeExtras == nil {
+						cumulativeExtras = make(map[string]interface{})
+					}
+					// The highest error in the stack overrides the tag value set by the lower error in the stack
+					if _, exists := cumulativeExtras[k]; !exists {
+						cumulativeExtras[k] = v
 					}
 				}
 			}
