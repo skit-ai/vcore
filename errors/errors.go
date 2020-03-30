@@ -108,7 +108,7 @@ func NewErrorWithTags(_msg string, _cause error, _fatal bool, _tags map[string]s
 }
 
 // Creates an error which is chained with a cause
-func NewErrorWithExtras(_msg string, _cause error, _fatal bool, _extras map[string]string) error {
+func NewErrorWithExtras(_msg string, _cause error, _fatal bool, _extras map[string]interface{}) error {
 	err := &rung{
 		cause:  _cause,
 		msg:    _msg,
