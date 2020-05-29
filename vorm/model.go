@@ -1,10 +1,12 @@
 package vorm
 
 import (
+	"database/sql/driver"
 	"fmt"
 	"github.com/Vernacular-ai/vcore/errors"
 	"os"
 	"strconv"
+	"time"
 
 	"github.com/Vernacular-ai/gorm"
 	_ "github.com/Vernacular-ai/gorm/dialects/mysql"
@@ -65,4 +67,77 @@ func initDBInternal(dialect string, dataSourceName string) (*Model, error) {
 	} else {
 		return nil, errors.NewError(fmt.Sprintf("Unable to connect using dialect `%s` and source `%s`", dialect, dataSourceName), err, true)
 	}
+}
+
+// Represents a database agnostic primary key
+type Primary uint
+
+func (x *Primary) Scan(src interface{}) error {
+	if val, ok := src.(uint); ok {
+		*x = Primary(val)
+	} else if val, ok := src.(float64); ok {
+		// This happens due to oracle driver not knowing that uint is required by the calling code.
+		*x = Primary(uint(val))
+	} else if val, ok := src.(int64); ok {
+		*x = Primary(uint(val))
+	}
+	// Note: This else results in errors while inserting into the table in oracle. Hence not using such a clause
+	//else {
+	//	return errors.New(fmt.Sprintf("Unable to convert %v to uint", src))
+	//}
+
+	return nil
+}
+
+func (x *Primary) Value() (driver.Value, error) {
+	return *x, nil
+}
+
+func (x *Primary) Uint() uint {
+	return uint(*x)
+}
+
+func (x *Primary) Foreign() Foreign {
+	return Foreign(*x)
+}
+
+
+// Represents a database agnostic foreign key
+type Foreign uint
+
+func (x *Foreign) Scan(src interface{}) error {
+	if val, ok := src.(uint); ok {
+		*x = Foreign(val)
+	} else if val, ok := src.(float64); ok {
+		// This happens due to oracle driver not knowing that uint is required by the calling code.
+		*x = Foreign(uint(val))
+	} else if val, ok := src.(int64); ok {
+		*x = Foreign(uint(val))
+	}
+	// Note: This else results in errors while inserting into the table in oracle. Hence not using such a clause
+	//else {
+	//	return errors.New(fmt.Sprintf("Unable to convert %v to uint", src))
+	//}
+
+	return nil
+}
+
+func (x *Foreign) Value() (driver.Value, error) {
+	return *x, nil
+}
+
+func (x *Foreign) Uint() uint {
+	return uint(*x)
+}
+
+func (x *Foreign) Primary() Primary {
+	return Primary(*x)
+}
+
+// Mimicks gorm.Model except ID is of type Primary
+type ORM struct {
+	ID        Primary `gorm:"primary_key"`
+	CreatedAt time.Time
+	UpdatedAt time.Time
+	DeletedAt *time.Time `sql:"index"`
 }
