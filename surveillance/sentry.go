@@ -121,3 +121,11 @@ func (wrapper *Sentry) HandleHttpRouter(handler httprouter.Handle) httprouter.Ha
 		return handler
 	}
 }
+
+// SentryMiddleware use directly with mux
+// returns http.Handler to directly use with router 
+func (wrapper *Sentry) SentryMiddleware(next http.Handler) http.Handler {
+    return wrapper.HandleFunc(func(w http.ResponseWriter, r *http.Request) {
+        next.ServeHTTP(w, r)
+    })
+}
