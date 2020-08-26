@@ -61,6 +61,7 @@ type rung struct {
 	fatal bool
 	tags  map[string]string
 	extras map[string]interface{}
+	ignore bool
 }
 
 func (e *rung) Error() (errorMsg string) {
@@ -91,6 +92,10 @@ func (e *rung) Extras() map[string]interface{} {
 	return e.extras
 }
 
+func (e *rung) Ignore() bool {
+	return e.ignore
+}
+
 // Creates an error which is chained with a cause
 func NewError(_msg string, _cause error, _fatal bool) error {
 	return NewErrorWithTags(_msg, _cause, _fatal, nil)
@@ -115,6 +120,17 @@ func NewErrorWithExtras(_msg string, _cause error, _fatal bool, _extras map[stri
 		fatal:  _fatal,
 		tags:   nil,
 		extras: _extras,
+	}
+	return _err.WithStack(err)
+}
+
+// NewErrorToIgnore returns an error that informs loggers to ignore it
+func NewErrorToIgnore(_msg string, _cause error, _fatal, ignore bool) error {
+	err := &rung{
+		cause:  _cause,
+		msg:    _msg,
+		fatal:  _fatal,
+		ignore: ignore,
 	}
 	return _err.WithStack(err)
 }
@@ -238,6 +254,34 @@ func Extras(err error) (cumulativeExtras map[string]interface{}) {
 	}
 
 	return
+}
+
+func Ignore(err error) bool {
+	type ignore interface {
+		Ignore() bool
+	}
+
+	// Keep going through all the errors in the stack and find if any error is supposed to be ignored
+	for err != nil {
+		if check, ok := err.(ignore); ok {
+			ignore := check.Ignore()
+			if ignore {
+				return true
+			}
+		}
+
+		// Going to the cause of the current error(if any)
+		cause, ok := err.(causer)
+		if !ok {
+			// Since there is no cause of the current error, it is the root error(original error) that caused the issue
+			// in the first place. Hence breaking the loop.
+			break
+		}
+
+		err = cause.Cause()
+	}
+
+	return false
 }
 
 // Finds the deepest non-nil cause
