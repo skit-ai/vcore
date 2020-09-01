@@ -125,11 +125,11 @@ func NewErrorWithExtras(_msg string, _cause error, _fatal bool, _extras map[stri
 }
 
 // NewErrorToIgnore returns an error that informs loggers to ignore it
-func NewErrorToIgnore(_msg string, _cause error, _fatal, ignore bool) error {
+func NewErrorToIgnore(_msg string, _cause error, ignore bool) error {
 	err := &rung{
 		cause:  _cause,
 		msg:    _msg,
-		fatal:  _fatal,
+		fatal:  false,
 		ignore: ignore,
 	}
 	return _err.WithStack(err)
