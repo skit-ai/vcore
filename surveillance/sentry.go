@@ -66,7 +66,9 @@ var (
 // Handles an error by capturing it on Sentry and logging the same on STDOUT
 func (wrapper *Sentry) Capture(err error, _panic bool) {
 	if err != nil {
-		if wrapper.client != nil {
+		// Do not log to sentry if the error is ignorable.
+		// However, do log it to stdout
+		if wrapper.client != nil && !errors.Ignore(err) {
 			// Capture error asynchronously
 			sentry.WithScope(func(scope *sentry.Scope) {
 
