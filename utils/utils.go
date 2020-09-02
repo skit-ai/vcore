@@ -10,6 +10,7 @@ import (
 	"io"
 	"log"
 	"math"
+	"os"
 	"reflect"
 	"regexp"
 	"runtime"
@@ -22,6 +23,8 @@ import (
 
 	"github.com/google/go-cmp/cmp"
 )
+
+var DevMode = strings.ToUpper(os.Getenv("ENVIRONMENT")) == "DEV"
 
 var link = regexp.MustCompile("(^[A-Za-z])|_([A-Za-z])")
 
