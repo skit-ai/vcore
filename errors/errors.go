@@ -3,6 +3,7 @@ package errors
 import (
 	"fmt"
 	_err "github.com/pkg/errors"
+	"net/http"
 	"strings"
 )
 
@@ -62,6 +63,7 @@ type rung struct {
 	tags  map[string]string
 	extras map[string]interface{}
 	ignore bool
+	code int
 }
 
 func (e *rung) Error() (errorMsg string) {
@@ -94,6 +96,10 @@ func (e *rung) Extras() map[string]interface{} {
 
 func (e *rung) Ignore() bool {
 	return e.ignore
+}
+
+func (e *rung) Code() int {
+	return e.code
 }
 
 // Creates an error which is chained with a cause
@@ -131,6 +137,18 @@ func NewErrorToIgnore(_msg string, _cause error) error {
 		msg:    _msg,
 		fatal:  false,
 		ignore: true,
+	}
+	return _err.WithStack(err)
+}
+
+// NewErrorWithCode returns an error that has an int code associated with it
+func NewErrorWithCode(_msg string, code int, _cause error) error {
+	err := &rung{
+		cause:  _cause,
+		msg:    _msg,
+		fatal:  false,
+		ignore: false,
+		code:   code,
 	}
 	return _err.WithStack(err)
 }
@@ -301,4 +319,61 @@ func DeepestCause(err error) error {
 		}
 	}
 	return err
+}
+
+// This allows us to attach a response code with an error. This is achieved by implementing
+// the errorCode interface:
+//     type errorCode interface {
+//            Code() bool
+//     }
+//
+// If the error does not implement errorCode, 500 will be returned.
+// If the error is nil, 200 will be returned without further investigation.
+// The logic will loop through the topmost error of the stack followed by all
+// it's causes provided it implements the causer interface:
+//
+//	  type causer interface {
+//			  Cause() error
+//	  }
+// If any one of the causes implements errorCode and returns a non-zero Code(),
+// that code is returned to the calling function.
+func Code(err error, defaultCode int) (code int) {
+
+	if err == nil {
+		return http.StatusOK
+	}
+
+	type errorCode interface {
+		Code() int
+	}
+
+	// Keep going through all the errors in the stack until we hit one error
+	// which implements errorCode and has a non-zero error code.
+	// We use this first error to return the error code.
+	for err != nil {
+		if check, ok := err.(errorCode); ok {
+			if code = check.Code(); code != 0 {
+				break
+			}
+		}
+
+		// Going to the cause of the current error(if any)
+		cause, ok := err.(causer)
+		if !ok {
+			// Since there is no cause of the current error, it is the root error(original error) that caused the issue
+			// in the first place. Hence breaking the loop.
+			break
+		}
+
+		err = cause.Cause()
+	}
+
+	if code <= 0 {
+		if defaultCode <= 0 {
+			code = http.StatusInternalServerError
+		} else {
+			code = defaultCode
+		}
+	}
+	return
 }
