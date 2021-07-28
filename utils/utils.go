@@ -344,7 +344,7 @@ func ToCamelCase(str string) string {
 // Closes a struct which implements io.Closer safely
 func CloseSafely(closeable io.Closer) {
 	if closeable != nil {
-		Capture(closeable.Close(), false)
+		surveillance.SentryClient.Capture(closeable.Close(), false)
 	}
 }
 

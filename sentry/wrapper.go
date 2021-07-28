@@ -2,11 +2,13 @@ package sentry
 
 import (
 	"context"
+	"fmt"
+	"net/http"
+	"time"
+
 	"github.com/getsentry/sentry-go"
 	sentryhttp "github.com/getsentry/sentry-go/http"
 	"github.com/julienschmidt/httprouter"
-	"net/http"
-	"time"
 )
 
 
@@ -19,14 +21,28 @@ type Handler struct {
 // HandleFunc wraps http.HandleFunc and recovers from caught panics.
 func (h *Handler) HandleFunc(handler http.HandlerFunc) http.HandlerFunc {
 	return func(rw http.ResponseWriter, r *http.Request) {
-		hub := sentry.CurrentHub().Clone()
-		hub.Scope().SetRequest(sentry.Request{}.FromHTTPRequest(r))
-		ctx := sentry.SetHubOnContext(
-			r.Context(),
-			hub,
+		ctx := r.Context()
+		hub := sentry.GetHubFromContext(ctx)
+		if hub == nil {
+			hub = sentry.CurrentHub().Clone()
+			ctx = sentry.SetHubOnContext(ctx, hub)
+		}
+		span := sentry.StartSpan(ctx, "http.server",
+			sentry.TransactionName(fmt.Sprintf("%s %s", r.Method, r.URL.Path)),
+			sentry.ContinueFromRequest(r),
 		)
+		defer span.Finish()
+		// TODO(tracing): if the next handler.ServeHTTP panics, store
+		// information on the transaction accordingly (status, tag,
+		// level?, ...).
+		r = r.WithContext(span.Context())
+		hub.Scope().SetRequest(r)
 		defer h.recoverWithSentry(hub, r)
-		handler(rw, r.WithContext(ctx))
+
+		// TODO(tracing): use custom response writer to intercept
+		// response. Use HTTP status to add tag to transaction; set span
+		// status.
+		handler.ServeHTTP(rw, r)
 	}
 }
 
@@ -57,14 +73,25 @@ func New(options sentryhttp.Options) *Handler {
 // HandleFunc wraps http.HandleFunc and recovers from caught panics.
 func (h *Handler) HandleHttpRouter(handler httprouter.Handle) httprouter.Handle {
 	return func(rw http.ResponseWriter, r *http.Request, params httprouter.Params) {
-		hub := sentry.CurrentHub().Clone()
-		hub.Scope().SetRequest(sentry.Request{}.FromHTTPRequest(r))
-		ctx := sentry.SetHubOnContext(
-			r.Context(),
-			hub,
+		ctx := r.Context()
+		hub := sentry.GetHubFromContext(ctx)
+		if hub == nil {
+			hub = sentry.CurrentHub().Clone()
+			ctx = sentry.SetHubOnContext(ctx, hub)
+		}
+		span := sentry.StartSpan(ctx, "http.server",
+			sentry.TransactionName(fmt.Sprintf("%s %s", r.Method, r.URL.Path)),
+			sentry.ContinueFromRequest(r),
 		)
+		defer span.Finish()
+		// TODO(tracing): if the next handler.ServeHTTP panics, store
+		// information on the transaction accordingly (status, tag,
+		// level?, ...).
+		r = r.WithContext(span.Context())
+		hub.Scope().SetRequest(r)
 		defer h.recoverWithSentry(hub, r)
-		handler(rw, r.WithContext(ctx), params)
+
+		handler(rw, r, params)
 	}
 }
 

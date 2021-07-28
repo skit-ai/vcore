@@ -1,14 +1,16 @@
 package surveillance
 
 import (
+	"context"
+	"net/http"
+	"os"
+
 	"github.com/Vernacular-ai/vcore/errors"
 	"github.com/Vernacular-ai/vcore/log"
 	sentryWrapper "github.com/Vernacular-ai/vcore/sentry"
 	"github.com/getsentry/sentry-go"
 	"github.com/getsentry/sentry-go/http"
 	"github.com/julienschmidt/httprouter"
-	"net/http"
-	"os"
 )
 
 type Sentry struct {
@@ -21,6 +23,7 @@ func initSentry() (client *Sentry) {
 	if dsn != "" {
 		if err := sentry.Init(sentry.ClientOptions{
 			Dsn: dsn,
+			AttachStacktrace: true,
 			// Use async transport. Which is set by default. Use Sync transport for testing.
 			//Transport: sentry.NewHTTPSyncTransport(),
 
@@ -42,22 +45,6 @@ func initSentry() (client *Sentry) {
 	}
 	return
 }
-
-//func initSentry() *Sentry {
-//	dsn := os.Getenv("SENTRY_DSN")
-//	if dsn != "" {
-//		if client, err := raven.New(dsn); err != nil {
-//			return &Sentry{nil}
-//		} else {
-//			_client := &Sentry{client}
-//			_client.client.SetRelease(os.Getenv("SENTRY_RELEASE"))
-//			_client.client.SetEnvironment(os.Getenv("SENTRY_ENVIRONMENT"))
-//			return _client
-//		}
-//	} else {
-//		return &Sentry{nil}
-//	}
-//}
 
 var (
 	SentryClient = initSentry()
@@ -89,6 +76,44 @@ func (wrapper *Sentry) Capture(err error, _panic bool) {
 				eventId := sentry.CaptureException(err)
 				log.Errorf(err, "Error captured in sentry with the event ID `%s`", *eventId)
 			})
+		} else {
+			// Log the error sans sentry's event ID information
+			log.Error(err)
+		}
+
+		if _panic {
+			panic(err)
+		}
+	}
+}
+
+// Handles an error by capturing it on Sentry and logging the same on STDOUT
+func (wrapper *Sentry) CaptureWithContext(c context.Context, err error, _panic bool) {
+	if err != nil {
+		// Do not log to sentry if the error is ignorable.
+		// However, do log it to stdout
+		if wrapper.client != nil && !errors.Ignore(err) {
+			// Capture error asynchronously
+			if hub := sentry.GetHubFromContext(c); hub != nil {
+				sentry.WithScope(func(scope *sentry.Scope) {
+					// Setting the stacktrace of the error as an extra along with any other extras set in the error
+					if extras := errors.Extras(err); extras != nil {
+						scope.SetExtras(extras)
+						scope.SetExtra("stacktrace", errors.Stacktrace(err))
+					} else {
+						scope.SetExtras(map[string]interface{}{
+							"stacktrace": errors.Stacktrace(err),
+						})
+					}
+
+					// Determining the tags(if any) set on the error
+					scope.SetTags(errors.Tags(err))
+				})
+
+				// Capturing the error on Sentry
+				eventId := sentry.CaptureException(err)
+				log.Errorf(err, "Error captured in sentry with the event ID `%s`", *eventId)
+			}
 		} else {
 			// Log the error sans sentry's event ID information
 			log.Error(err)
