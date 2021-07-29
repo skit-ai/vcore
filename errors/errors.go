@@ -130,6 +130,17 @@ func NewErrorWithExtras(_msg string, _cause error, _fatal bool, _extras map[stri
 	return _err.WithStack(err)
 }
 
+func NewErrorWithTagsAndExtras(_msg string, _cause error, _fatal bool, _tags map[string]string, _extras map[string]interface{}) error {
+	err := &rung{
+		cause:  _cause,
+		msg:    _msg,
+		fatal:  _fatal,
+		tags:   _tags,
+		extras: _extras,
+	}
+	return _err.WithStack(err)
+}
+
 // NewErrorToIgnore returns an error that informs loggers to ignore it
 func NewErrorToIgnore(_msg string, _cause error) error {
 	err := &rung{
