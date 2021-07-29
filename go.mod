@@ -22,4 +22,6 @@ require (
 	gopkg.in/yaml.v2 v2.2.4
 )
 
+replace gopkg.in/yaml.v2 => gopkg.in/yaml.v2 v2.2.2
+
 // replace github.com/Vernacular-ai/gorm => /Users/adityasatyavada/go/src/github.com/Vernacular-ai/gorm
