@@ -11,6 +11,9 @@ import (
 	"github.com/getsentry/sentry-go"
 	"github.com/getsentry/sentry-go/http"
 	"github.com/julienschmidt/httprouter"
+	"google.golang.org/grpc"
+	"google.golang.org/grpc/codes"
+	"google.golang.org/grpc/status"
 )
 
 type Sentry struct {
@@ -111,7 +114,7 @@ func (wrapper *Sentry) CaptureWithContext(c context.Context, err error, _panic b
 				})
 
 				// Capturing the error on Sentry
-				eventId := sentry.CaptureException(err)
+				eventId := hub.CaptureException(err)
 				log.Errorf(err, "Error captured in sentry with the event ID `%s`", *eventId)
 			}
 		} else {
@@ -155,4 +158,43 @@ func (wrapper *Sentry) SentryMiddleware(next http.Handler) http.Handler {
     return wrapper.HandleFunc(func(w http.ResponseWriter, r *http.Request) {
         next.ServeHTTP(w, r)
     })
+}
+
+// UnaryServerInterceptor is a grpc interceptor that reports errors and panics
+// to sentry. It also sets *sentry.Hub to context.
+func (wrapper *Sentry) UnaryServerInterceptor() grpc.UnaryServerInterceptor {
+	opts := sentryWrapper.BuildOptions(sentryWrapper.WithRepanic(false))
+
+	return func(
+		ctx context.Context,
+		req interface{},
+		info *grpc.UnaryServerInfo,
+		handler grpc.UnaryHandler,
+	) (resp interface{}, err error) {
+		hub := sentry.GetHubFromContext(ctx)
+		if hub == nil {
+			hub = sentry.CurrentHub().Clone()
+			ctx = sentry.SetHubOnContext(ctx, hub)
+		}
+
+		defer func() {
+			if r := recover(); r != nil {
+				hub.RecoverWithContext(ctx, r)
+
+				if opts.Repanic {
+					panic(r)
+				}
+
+				err = status.Errorf(codes.Internal, "%s", r)
+			}
+		}()
+
+		resp, err = handler(ctx, req)
+
+		if opts.ReportOn(err) {
+			hub.CaptureException(err)
+		}
+
+		return resp, err
+	}
 }
