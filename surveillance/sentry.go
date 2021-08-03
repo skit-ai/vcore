@@ -116,6 +116,8 @@ func (wrapper *Sentry) CaptureWithContext(c context.Context, err error, _panic b
 				// Capturing the error on Sentry
 				eventId := hub.CaptureException(err)
 				log.Errorf(err, "Error captured in sentry with the event ID `%s`", *eventId)
+			} else {
+				wrapper.Capture(err, _panic)
 			}
 		} else {
 			// Log the error sans sentry's event ID information
@@ -196,5 +198,41 @@ func (wrapper *Sentry) UnaryServerInterceptor() grpc.UnaryServerInterceptor {
 		}
 
 		return resp, err
+	}
+}
+
+// StreamServerInterceptor returns a grpc interceptor that reports errors and panics
+// to sentry. It also sets *sentry.Hub to context.
+func (wrapper *Sentry) StreamServerInterceptor() grpc.StreamServerInterceptor {
+	opts := sentryWrapper.BuildOptions(sentryWrapper.WithRepanic(false))
+
+	return func(
+		srv interface{},
+		stream grpc.ServerStream,
+		info *grpc.StreamServerInfo,
+		handler grpc.StreamHandler,
+	) error {
+		ctx := stream.Context()
+		hub := sentry.GetHubFromContext(ctx)
+		if hub == nil {
+			hub = sentry.CurrentHub().Clone()
+			ctx = sentry.SetHubOnContext(ctx, hub)
+		}
+
+		defer func() {
+			if r := recover(); r != nil {
+				hub.RecoverWithContext(ctx, r)
+
+				if opts.Repanic {
+					panic(r)
+				}
+
+				_ = status.Errorf(codes.Internal, "%s", r)
+			}
+		}()
+
+		wrapped := sentryWrapper.WrapServerStream(stream)
+		wrapped.WrappedContext = ctx
+		return handler(srv, wrapped)
 	}
 }
