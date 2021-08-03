@@ -233,6 +233,12 @@ func (wrapper *Sentry) StreamServerInterceptor() grpc.StreamServerInterceptor {
 
 		wrapped := sentryWrapper.WrapServerStream(stream)
 		wrapped.WrappedContext = ctx
-		return handler(srv, wrapped)
+		err := handler(srv, wrapped)
+
+		if opts.ReportOn(err) {
+			hub.CaptureException(err)
+		}
+
+		return err
 	}
 }
