@@ -21,9 +21,11 @@ type Sentry struct {
 	handler *sentryWrapper.Handler
 }
 
-func initSentry() (client *Sentry) {
+func InitSentry(release string) (client *Sentry) {
 	dsn := os.Getenv("SENTRY_DSN")
-	release := os.Getenv("SENTRY_RELEASE")
+	if release == "" {
+		release = os.Getenv("SENTRY_RELEASE")
+	}
 	if dsn != "" {
 		if err := sentry.Init(sentry.ClientOptions{
 			Dsn: dsn,
@@ -54,7 +56,7 @@ func initSentry() (client *Sentry) {
 }
 
 var (
-	SentryClient = initSentry()
+	SentryClient = InitSentry("")
 )
 
 // Handles an error by capturing it on Sentry and logging the same on STDOUT
