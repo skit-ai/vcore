@@ -23,6 +23,7 @@ type Sentry struct {
 
 func initSentry() (client *Sentry) {
 	dsn := os.Getenv("SENTRY_DSN")
+	release := os.Getenv("SENTRY_RELEASE")
 	if dsn != "" {
 		if err := sentry.Init(sentry.ClientOptions{
 			Dsn: dsn,
@@ -32,6 +33,9 @@ func initSentry() (client *Sentry) {
 
 			// Enable debugging to check connectivity
 			//Debug: true,
+
+			Release: release,
+
 			Environment: os.Getenv("ENVIRONMENT"),
 		}); err != nil {
 			log.Warnf("Could not initialize sentry with DSN: %s", dsn)
