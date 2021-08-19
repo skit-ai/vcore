@@ -9,7 +9,7 @@ import (
 	"github.com/Vernacular-ai/vcore/log"
 	sentryWrapper "github.com/Vernacular-ai/vcore/sentry"
 	"github.com/getsentry/sentry-go"
-	"github.com/getsentry/sentry-go/http"
+	sentryhttp "github.com/getsentry/sentry-go/http"
 	"github.com/julienschmidt/httprouter"
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/codes"
@@ -23,10 +23,12 @@ type Sentry struct {
 
 func initSentry() (client *Sentry) {
 	dsn := os.Getenv("SENTRY_DSN")
+	release := os.Getenv("SENTRY_RELEASE")
 	if dsn != "" {
 		if err := sentry.Init(sentry.ClientOptions{
-			Dsn: dsn,
+			Dsn:              dsn,
 			AttachStacktrace: true,
+			Release:          release,
 			// Use async transport. Which is set by default. Use Sync transport for testing.
 			//Transport: sentry.NewHTTPSyncTransport(),
 
@@ -63,7 +65,7 @@ func (wrapper *Sentry) Capture(err error, _panic bool) {
 			sentry.WithScope(func(scope *sentry.Scope) {
 
 				// Setting the stacktrace of the error as an extra along with any other extras set in the error
-				if extras := errors.Extras(err); extras != nil{
+				if extras := errors.Extras(err); extras != nil {
 					scope.SetExtras(extras)
 					scope.SetExtra("stacktrace", errors.Stacktrace(err))
 				} else {
@@ -155,11 +157,11 @@ func (wrapper *Sentry) HandleHttpRouter(handler httprouter.Handle) httprouter.Ha
 }
 
 // SentryMiddleware use directly with mux
-// returns http.Handler to directly use with router 
+// returns http.Handler to directly use with router
 func (wrapper *Sentry) SentryMiddleware(next http.Handler) http.Handler {
-    return wrapper.HandleFunc(func(w http.ResponseWriter, r *http.Request) {
-        next.ServeHTTP(w, r)
-    })
+	return wrapper.HandleFunc(func(w http.ResponseWriter, r *http.Request) {
+		next.ServeHTTP(w, r)
+	})
 }
 
 // UnaryServerInterceptor is a grpc interceptor that reports errors and panics
