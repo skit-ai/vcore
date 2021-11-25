@@ -68,13 +68,12 @@ func (wrapper *Sentry) Capture(err error, _panic bool) {
 			sentry.WithScope(func(scope *sentry.Scope) {
 
 				// Setting the stacktrace of the error as an extra along with any other extras set in the error
-				if extras := errors.Extras(err); extras != nil{
+				if extras := errors.Extras(err); extras != nil {
+					scope.SetContext("extras", extras)
+
+					// setExtras is deprecated
+					// adding it for backward compatibility with vernacular's sentry
 					scope.SetExtras(extras)
-					scope.SetExtra("stacktrace", errors.Stacktrace(err))
-				} else {
-					scope.SetExtras(map[string]interface{}{
-						"stacktrace": errors.Stacktrace(err),
-					})
 				}
 
 				// Determining the tags(if any) set on the error
@@ -106,12 +105,11 @@ func (wrapper *Sentry) CaptureWithContext(c context.Context, err error, _panic b
 				sentry.WithScope(func(scope *sentry.Scope) {
 					// Setting the stacktrace of the error as an extra along with any other extras set in the error
 					if extras := errors.Extras(err); extras != nil {
+						scope.SetContext("extras", extras)
+	
+						// setExtras is deprecated
+						// adding it for backward compatibility with vernacular's sentry
 						scope.SetExtras(extras)
-						scope.SetExtra("stacktrace", errors.Stacktrace(err))
-					} else {
-						scope.SetExtras(map[string]interface{}{
-							"stacktrace": errors.Stacktrace(err),
-						})
 					}
 
 					// Determining the tags(if any) set on the error
