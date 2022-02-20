@@ -101,7 +101,6 @@ func (x *Primary) Foreign() Foreign {
 	return Foreign(*x)
 }
 
-
 // Represents a database agnostic foreign key
 type Foreign uint
 

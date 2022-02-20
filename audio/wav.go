@@ -15,10 +15,10 @@ func EncodeToWav(rawPcmBytes []byte, samplingRate uint32, bitDepth uint16, numCh
 	// numFrames := numDataLength / 2
 
 	// append wav header of 44 bytes
-	waveAudioBytes := make([]byte, 44 + numDataLength)
+	waveAudioBytes := make([]byte, 44+numDataLength)
 	// write RIFF and size
 	copy(waveAudioBytes, tokenRiff[:])
-	binary.LittleEndian.PutUint32(waveAudioBytes[4:], uint32(36 + numDataLength))
+	binary.LittleEndian.PutUint32(waveAudioBytes[4:], uint32(36+numDataLength))
 
 	// write format
 	copy(waveAudioBytes[8:], tokenWaveFormat[:])
@@ -29,13 +29,13 @@ func EncodeToWav(rawPcmBytes []byte, samplingRate uint32, bitDepth uint16, numCh
 	binary.LittleEndian.PutUint16(waveAudioBytes[20:], 1)
 	binary.LittleEndian.PutUint16(waveAudioBytes[22:], numChannels)
 	binary.LittleEndian.PutUint32(waveAudioBytes[24:], samplingRate)
-	binary.LittleEndian.PutUint32(waveAudioBytes[28:], uint32(numChannels) * samplingRate * uint32(bitDepth) / 8) // bytes per sec
-	binary.LittleEndian.PutUint16(waveAudioBytes[32:], (bitDepth / 8) * numChannels) // bytes per block
-	binary.LittleEndian.PutUint16(waveAudioBytes[34:], bitDepth) // bytes per block
+	binary.LittleEndian.PutUint32(waveAudioBytes[28:], uint32(numChannels)*samplingRate*uint32(bitDepth)/8) // bytes per sec
+	binary.LittleEndian.PutUint16(waveAudioBytes[32:], (bitDepth/8)*numChannels)                            // bytes per block
+	binary.LittleEndian.PutUint16(waveAudioBytes[34:], bitDepth)                                            // bytes per block
 
 	// write data chunk
 	copy(waveAudioBytes[36:], tokenData[:])
-	binary.LittleEndian.PutUint32(waveAudioBytes[40:], uint32(36 + numDataLength))
+	binary.LittleEndian.PutUint32(waveAudioBytes[40:], uint32(36+numDataLength))
 	copy(waveAudioBytes[44:], rawPcmBytes)
 
 	return waveAudioBytes, nil

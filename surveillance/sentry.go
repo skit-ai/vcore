@@ -28,7 +28,7 @@ func InitSentry(release string) (client *Sentry) {
 	}
 	if dsn != "" {
 		if err := sentry.Init(sentry.ClientOptions{
-			Dsn: dsn,
+			Dsn:              dsn,
 			AttachStacktrace: true,
 			// Use async transport. Which is set by default. Use Sync transport for testing.
 			//Transport: sentry.NewHTTPSyncTransport(),
@@ -106,7 +106,7 @@ func (wrapper *Sentry) CaptureWithContext(c context.Context, err error, _panic b
 					// Setting the stacktrace of the error as an extra along with any other extras set in the error
 					if extras := errors.Extras(err); extras != nil {
 						scope.SetContext("extras", extras)
-	
+
 						// setExtras is deprecated
 						// adding it for backward compatibility with vernacular's sentry
 						scope.SetExtras(extras)
@@ -158,11 +158,11 @@ func (wrapper *Sentry) HandleHttpRouter(handler httprouter.Handle) httprouter.Ha
 }
 
 // SentryMiddleware use directly with mux
-// returns http.Handler to directly use with router 
+// returns http.Handler to directly use with router
 func (wrapper *Sentry) SentryMiddleware(next http.Handler) http.Handler {
-    return wrapper.HandleFunc(func(w http.ResponseWriter, r *http.Request) {
-        next.ServeHTTP(w, r)
-    })
+	return wrapper.HandleFunc(func(w http.ResponseWriter, r *http.Request) {
+		next.ServeHTTP(w, r)
+	})
 }
 
 // UnaryServerInterceptor is a grpc interceptor that reports errors and panics

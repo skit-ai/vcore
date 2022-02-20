@@ -2,9 +2,9 @@ package log
 
 import (
 	"fmt"
+	"github.com/Vernacular-ai/vcore/errors"
 	"log"
 	"strings"
-	"github.com/Vernacular-ai/vcore/errors"
 )
 
 const (
