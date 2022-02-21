@@ -4,6 +4,7 @@ import (
 	"bufio"
 	"context"
 	"encoding/csv"
+	"fmt"
 	"io/ioutil"
 	"net/http"
 	"os"
@@ -114,6 +115,15 @@ func DownloadFile(ctx context.Context, url, filepath string) (err error) {
 
 	bodyBytes, err := ioutil.ReadAll(resp.Body)
 	if err != nil {
+		return
+	}
+
+	// Response status code check
+	// 200 <= response status code < 400
+	if !(resp.StatusCode >= http.StatusOK && resp.StatusCode < http.StatusBadRequest) {
+		errMessage := fmt.Sprintf("Failed: Error in downloading file.\nRequest Context: filepath => %s and file_download_url => %s\nResponse Context: \nstatus_code => %d\nresponse_text => %s", filepath, url, resp.StatusCode, string(bodyBytes))
+		err = errors.NewError(errMessage, nil, false)
+		Capture(err, false)
 		return
 	}
 	_, err = WriteToFile(bodyBytes, filepath)

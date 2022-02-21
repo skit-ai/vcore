@@ -95,7 +95,7 @@ func (producer *Producer) Publish(exchange, exchangeType, routingKey, body strin
 
 func (producer *Producer) Shutdown() error {
 
-	if producer == nil{
+	if producer == nil {
 		return nil
 	}
 

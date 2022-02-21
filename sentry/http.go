@@ -11,7 +11,6 @@ import (
 	"github.com/julienschmidt/httprouter"
 )
 
-
 type Handler struct {
 	repanic         bool
 	waitForDelivery bool

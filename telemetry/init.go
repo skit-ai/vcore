@@ -17,7 +17,7 @@ type Transaction struct {
 	transaction newrelic.Transaction
 }
 
-func newClient() NewRelicClient{
+func newClient() NewRelicClient {
 	appName := os.Getenv("NEW_RELIC_APP_NAME")
 	licenseKey := os.Getenv("NEW_RELIC_LICENSE_KEY")
 

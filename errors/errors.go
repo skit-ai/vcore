@@ -57,13 +57,13 @@ func Fatal(err error) (isFatal bool) {
 // - fatality interface from FSM
 // It represents a rung in the chain of errors leading to the cause.
 type rung struct {
-	msg   string
-	cause error
-	fatal bool
-	tags  map[string]string
+	msg    string
+	cause  error
+	fatal  bool
+	tags   map[string]string
 	extras map[string]interface{}
 	ignore bool
-	code int
+	code   int
 }
 
 func (e *rung) Error() (errorMsg string) {
