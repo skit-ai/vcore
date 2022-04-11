@@ -2,9 +2,10 @@ package errors
 
 import (
 	"fmt"
-	_err "github.com/pkg/errors"
 	"net/http"
 	"strings"
+
+	_err "github.com/pkg/errors"
 )
 
 // Fatal is a condition to see if an error can be ignored or not.
@@ -167,6 +168,34 @@ func NewErrorWithCode(_msg string, code int, _cause error) error {
 // Based on https://godoc.org/github.com/pkg/errors#hdr-Formatted_printing_of_errors
 type stackTracer interface {
 	StackTrace() _err.StackTrace
+}
+
+// AddExtrasToError checks if the input error implements a causer interface. If it does,
+// it checks if the Cause is of internal type *rung. WHen this check also passes,
+// it adds the input _extras to the existing extras information. In case the checks fail,
+// the original error is returned.
+func AddExtrasToError(err error, _extras map[string]interface{}) error {
+	errCauser, ok := err.(causer)
+	if !ok || errCauser == nil {
+		return err
+	}
+
+	errAsRung, ok := errCauser.Cause().(*rung)
+	if !ok || errAsRung == nil {
+		return err
+	}
+
+	existingExtras := errAsRung.Extras()
+	if existingExtras == nil {
+		existingExtras = make(map[string]interface{})
+	}
+
+	for key, value := range _extras {
+		existingExtras[key] = value
+	}
+
+	errAsRung.extras = existingExtras
+	return errAsRung
 }
 
 // Determines the stacktrace of an error.
