@@ -389,3 +389,15 @@ func Reverse(s string) string {
 func MD5(str string) string {
 	return fmt.Sprintf("%x", md5.Sum([]byte(str)))
 }
+
+// ConvertInterfaceToString takes an interface as input and tries
+// to assert it as a string if not nil. It returns the string value
+// after the said assertion. False is returned if assertion fails
+func ConvertInterfaceToString(val interface{}) (string, bool) {
+	if val == nil {
+		return "", false
+	}
+
+	stringValue, ok := val.(string)
+	return stringValue, ok
+}
