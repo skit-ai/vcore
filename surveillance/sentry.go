@@ -9,7 +9,7 @@ import (
 	"github.com/Vernacular-ai/vcore/log"
 	sentryWrapper "github.com/Vernacular-ai/vcore/sentry"
 	"github.com/getsentry/sentry-go"
-	"github.com/getsentry/sentry-go/http"
+	sentryhttp "github.com/getsentry/sentry-go/http"
 	"github.com/julienschmidt/httprouter"
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/codes"
@@ -59,7 +59,8 @@ var (
 )
 
 // Handles an error by capturing it on Sentry and logging the same on STDOUT
-func (wrapper *Sentry) Capture(err error, _panic bool) {
+func (wrapper *Sentry) Capture(err error, _panic bool) sentry.EventID {
+	eventID := new(sentry.EventID)
 	if err != nil {
 		// Do not log to sentry if the error is ignorable.
 		// However, do log it to stdout
@@ -80,8 +81,10 @@ func (wrapper *Sentry) Capture(err error, _panic bool) {
 				scope.SetTags(errors.Tags(err))
 
 				// Capturing the error on Sentry
-				eventId := sentry.CaptureException(err)
-				log.Errorf(err, "Error captured in sentry with the event ID `%s`", *eventId)
+				eventID = sentry.CaptureException(err)
+				log.Errorf(err, "Error captured in sentry with the event ID `%s`", *eventID)
+
+				return
 			})
 		} else {
 			// Log the error sans sentry's event ID information
@@ -92,6 +95,8 @@ func (wrapper *Sentry) Capture(err error, _panic bool) {
 			panic(err)
 		}
 	}
+
+	return *eventID
 }
 
 // Handles an error by capturing it on Sentry and logging the same on STDOUT

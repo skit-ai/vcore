@@ -20,6 +20,7 @@ import (
 
 	"github.com/Vernacular-ai/vcore/errors"
 	"github.com/Vernacular-ai/vcore/surveillance"
+	"github.com/getsentry/sentry-go"
 
 	"github.com/google/go-cmp/cmp"
 )
@@ -358,8 +359,8 @@ func CloseAnythingSafely(toClose interface{}) {
 }
 
 // Handles an error by capturing it on Sentry and logging the same on STDOUT
-func Capture(err error, _panic bool) {
-	surveillance.SentryClient.Capture(err, _panic)
+func Capture(err error, _panic bool) sentry.EventID {
+	return surveillance.SentryClient.Capture(err, _panic)
 }
 
 func StringifyToJson(i interface{}) (stringifiedJson string) {
