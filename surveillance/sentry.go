@@ -100,7 +100,8 @@ func (wrapper *Sentry) Capture(err error, _panic bool) sentry.EventID {
 }
 
 // Handles an error by capturing it on Sentry and logging the same on STDOUT
-func (wrapper *Sentry) CaptureWithContext(c context.Context, err error, _panic bool) {
+func (wrapper *Sentry) CaptureWithContext(c context.Context, err error, _panic bool) sentry.EventID {
+	eventID := new(sentry.EventID)
 	if err != nil {
 		// Do not log to sentry if the error is ignorable.
 		// However, do log it to stdout
@@ -122,8 +123,8 @@ func (wrapper *Sentry) CaptureWithContext(c context.Context, err error, _panic b
 				})
 
 				// Capturing the error on Sentry
-				eventId := hub.CaptureException(err)
-				log.Errorf(err, "Error captured in sentry with the event ID `%s`", *eventId)
+				eventID = hub.CaptureException(err)
+				log.Errorf(err, "Error captured in sentry with the event ID `%s`", *eventID)
 			} else {
 				wrapper.Capture(err, _panic)
 			}
@@ -136,6 +137,8 @@ func (wrapper *Sentry) CaptureWithContext(c context.Context, err error, _panic b
 			panic(err)
 		}
 	}
+
+	return *eventID
 }
 
 // Wrapper over sentry-go/http#HandleFunc

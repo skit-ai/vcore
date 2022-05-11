@@ -3,6 +3,7 @@ package utils
 
 import (
 	"bytes"
+	"context"
 	"crypto/md5"
 	"encoding/json"
 	"fmt"
@@ -361,6 +362,11 @@ func CloseAnythingSafely(toClose interface{}) {
 // Handles an error by capturing it on Sentry and logging the same on STDOUT
 func Capture(err error, _panic bool) sentry.EventID {
 	return surveillance.SentryClient.Capture(err, _panic)
+}
+
+// Handles an error by capturing it on Sentry and logging the same on STDOUT
+func CaptureWithContext(c context.Context, err error, _panic bool) sentry.EventID {
+	return surveillance.SentryClient.CaptureWithContext(c, err, _panic)
 }
 
 func StringifyToJson(i interface{}) (stringifiedJson string) {
