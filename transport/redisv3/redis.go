@@ -34,3 +34,12 @@ func NewRadixRedisPool(size int, opts ...radix.PoolOpt) (*RadixRedisClient, erro
 	}
 	return &RadixRedisClient{redisClient}, nil
 }
+
+// NewRadixRedisClient - Return a redis client
+func NewRadixRedisPool(host string, port string) (*RadixRedisClient, error) {
+	redisClient, err := radix.NewPool("tcp", fmt.Sprintf("%v:%v", host, port, 10)
+	if err != nil {
+		return nil, err
+	}
+	return &RadixRedisClient{redisClient}, nil
+}
