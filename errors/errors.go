@@ -170,8 +170,36 @@ type stackTracer interface {
 	StackTrace() _err.StackTrace
 }
 
+// AddTagsToError checks if the input error implements a causer interface. If it does,
+// it checks if the Cause is of internal type *rung. When this check also passes,
+// it adds the input _tags to the existing tags information. In case the checks fail,
+// the original error is returned.
+func AddTagsToError(err error, _tags map[string]string) error {
+	errCauser, ok := err.(causer)
+	if !ok || errCauser == nil {
+		return err
+	}
+
+	errAsRung, ok := errCauser.Cause().(*rung)
+	if !ok || errAsRung == nil {
+		return err
+	}
+
+	existingTags := errAsRung.Tags()
+	if existingTags == nil {
+		existingTags = make(map[string]string)
+	}
+
+	for key, value := range _tags {
+		existingTags[key] = value
+	}
+
+	errAsRung.tags = existingTags
+	return errAsRung
+}
+
 // AddExtrasToError checks if the input error implements a causer interface. If it does,
-// it checks if the Cause is of internal type *rung. WHen this check also passes,
+// it checks if the Cause is of internal type *rung. When this check also passes,
 // it adds the input _extras to the existing extras information. In case the checks fail,
 // the original error is returned.
 func AddExtrasToError(err error, _extras map[string]interface{}) error {
