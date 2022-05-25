@@ -16,6 +16,7 @@ var VAULT_URI string = os.Getenv("VAULT_URI")
 var VAULT_ROLE_ID string = os.Getenv("VAULT_ROLE_ID")
 var VAULT_SECRET_ID string = os.Getenv("VAULT_SECRET_ID")
 var VAULT_APPROLE_MOUNTPATH string = os.Getenv("VAULT_APPROLE_MOUNTPATH")
+var VAULT_DATA_KEY_NAME string = os.Getenv("VAULT_DATA_KEY_NAME")
 var ENCRYPTED_DATA_KEY string = os.Getenv("ENCRYPTED_DATA_KEY")
 
 // Other Global Variables
@@ -55,6 +56,9 @@ func getDataKey() []byte {
 
 	appRoleAuth := getApproleAuth()
 	secret_, err := client.Auth().Login(context.TODO(), appRoleAuth)
+	if err != nil {
+		return nil
+	}
 
 	// TODO: make client object a singleton
 	// Initialize a lifetimewatcher to renew the token when it expires;
@@ -67,7 +71,10 @@ func getDataKey() []byte {
 	data := map[string]interface{}{
 		"ciphertext": ENCRYPTED_DATA_KEY,
 	}
-	secret, err := client.Logical().Write("/transit/decrypt/trialkey-0", data)
+	secret, err := client.Logical().Write("/transit/decrypt/"+VAULT_DATA_KEY_NAME, data)
+	if err != nil {
+		return nil
+	}
 
 	// Set DATA_KEY to plaintext value
 	DATA_KEY, err := base64.StdEncoding.DecodeString(secret.Data["plaintext"].(string))
