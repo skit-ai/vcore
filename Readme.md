@@ -55,6 +55,57 @@ errWithCause := errors.NewError("Error with a cause", cause, false)
 errWithCause.PrintStackTrace()
 ```
 
+## vcore/crypto
+
+The crypto module is meant to help services implement various cryptographic functions with ease.
+Current features include -
+
+1. Encryption of []byte and string. Supported techniques -
+    - AES-256-GCM
+2. Decryption of []byte. Supported techniques -
+    - AES-256-GCM
+
+AES-256 is PCI DSS compliant, as it is a recognised industry standard encryption.
+
+This module exports the following functions -
+1. EncryptBytes: Encrypt a bytearray. Example usage -
+``` go
+x := []byte("hello world")
+enc := EncryptBytes(x)
+fmt.Println(enc)
+```
+2. EncryptString: Encrypt a string. Example usage -
+``` go
+x := "hello world"
+enc := EncryptString(x)
+fmt.Println(enc)
+```
+3. DecryptBytes: Decrypt a bytearray. Example usage -
+``` go
+y := []byte{180, 27, 0, 28, 249, 65, 157, 217, 78, 134, 227, 25, 135, 180, 197, 2, 170, 235, 128, 7, 99, 202, 202, 210, 149, 75, 209, 157, 114, 129, 236, 206, 62, 132, 175, 42, 26, 224, 26}
+p := DecryptBytes(y)
+fmt.Println(string(p))
+```
+
+### Key management
+
+Vault is used to generate the encrypted data key when an environment/client is set up. The encrypted data key is passed to vcore as an environment variable.
+Vcore then calls Vault APIs to decrypt the data key and proceed with the encryption/decryption.
+
+### Environment Variables needed
+
+The following environment variables are needed to utilize the crypto module -
+``` sh
+export VAULT_URI="http://localhost:8200"
+export VAULT_ROLE_ID="****"
+export VAULT_SECRET_ID="****"
+export VAULT_APPROLE_MOUNTPATH="approle"
+export ENCRYPTED_DATA_KEY="****"
+export VAULT_DATA_KEY_NAME="datakey-name"
+```
+
+Note: the above environment variables are just examples, set up vault and replace the actual values above.
+
 ## vcore/log
 
 The log package is a basic wrapper on the standard log package  in Go's stdlib.
