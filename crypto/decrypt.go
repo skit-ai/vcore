@@ -1,10 +1,9 @@
 package crypto
 
+// Decrypt a byte array
+//
+// This function accepts an incoming byte array, decrypts it using AES-256 decryption and returns the result in bytes
 func DecryptBytes(cipherData []byte) []byte {
-	/**
-	Decrypt a byte array
-	*/
-
 	gcm := newCipherAESGCMObject()
 	if gcm == nil {
 		return nil
@@ -25,6 +24,9 @@ func DecryptBytes(cipherData []byte) []byte {
 	return data
 }
 
+// Decrypt a byte array
+//
+// This function accepts an incoming byte array, decrypts it using AES-256 decryption, converts the result into a string and returns the string
 func DecryptString(data []byte) string {
 	/**
 	**validate logic**
@@ -34,6 +36,6 @@ func DecryptString(data []byte) string {
 	// Convert incoming string to bytes
 	var byte_data = []byte(data)
 
-	// Encrypt bytes
+	// Decrypt bytes, convert to string and return
 	return string(DecryptBytes(byte_data))
 }

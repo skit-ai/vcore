@@ -1,3 +1,4 @@
+// A module to help with cryptographic requirements like encryption and hashing
 package crypto
 
 import (
@@ -12,27 +13,29 @@ import (
 )
 
 // Read Env Vars
-var VAULT_URI string = os.Getenv("VAULT_URI")
-var VAULT_ROLE_ID string = os.Getenv("VAULT_ROLE_ID")
-var VAULT_SECRET_ID string = os.Getenv("VAULT_SECRET_ID")
-var VAULT_APPROLE_MOUNTPATH string = os.Getenv("VAULT_APPROLE_MOUNTPATH")
-var VAULT_DATA_KEY_NAME string = os.Getenv("VAULT_DATA_KEY_NAME")
-var ENCRYPTED_DATA_KEY string = os.Getenv("ENCRYPTED_DATA_KEY")
+
+var vault_uri string = os.Getenv("VAULT_URI")
+var vault_role_id string = os.Getenv("VAULT_ROLE_ID")
+var vault_secret_id string = os.Getenv("VAULT_SECRET_ID")
+var vault_approle_mountpath string = os.Getenv("VAULT_APPROLE_MOUNTPATH")
+var vault_data_key_name string = os.Getenv("VAULT_DATA_KEY_NAME")
+var encrypted_data_key string = os.Getenv("ENCRYPTED_DATA_KEY")
 
 // Other Global Variables
-var DATA_KEY []byte
+
+var data_key []byte
 
 // Vault functions
 func getApproleAuth() *auth.AppRoleAuth {
-	// Check if VAULT_APPROLE_MOUNTPATH has a value
-	if len(VAULT_APPROLE_MOUNTPATH) == 0 {
-		VAULT_APPROLE_MOUNTPATH = "approle-batch"
+	// Check if vault_approle_mountpath has a value
+	if len(vault_approle_mountpath) == 0 {
+		vault_approle_mountpath = "approle-batch"
 	}
 
 	secretID := &auth.SecretID{
-		FromString: VAULT_SECRET_ID,
+		FromString: vault_secret_id,
 	}
-	appRoleAuth, err := auth.NewAppRoleAuth(VAULT_ROLE_ID, secretID, auth.WithMountPath(VAULT_APPROLE_MOUNTPATH))
+	appRoleAuth, err := auth.NewAppRoleAuth(vault_role_id, secretID, auth.WithMountPath(vault_approle_mountpath))
 	if err != nil {
 		return nil
 	}
@@ -41,13 +44,13 @@ func getApproleAuth() *auth.AppRoleAuth {
 }
 
 func getDataKey() []byte {
-	if len(DATA_KEY) != 0 {
-		return DATA_KEY
+	if len(data_key) != 0 {
+		return data_key
 	}
 
 	// Initialize vault client
 	config := &api.Config{
-		Address: VAULT_URI,
+		Address: vault_uri,
 	}
 	client, err := api.NewClient(config)
 	if err != nil {
@@ -69,20 +72,20 @@ func getDataKey() []byte {
 
 	// Decrypt the encrypted data key
 	data := map[string]interface{}{
-		"ciphertext": ENCRYPTED_DATA_KEY,
+		"ciphertext": encrypted_data_key,
 	}
-	secret, err := client.Logical().Write("/transit/decrypt/"+VAULT_DATA_KEY_NAME, data)
+	secret, err := client.Logical().Write("/transit/decrypt/"+vault_data_key_name, data)
 	if err != nil {
 		return nil
 	}
 
-	// Set DATA_KEY to plaintext value
-	DATA_KEY, err := base64.StdEncoding.DecodeString(secret.Data["plaintext"].(string))
+	// Set data_key to plaintext value
+	data_key, err := base64.StdEncoding.DecodeString(secret.Data["plaintext"].(string))
 	if err != nil {
 		return nil
 	}
 
-	return DATA_KEY
+	return data_key
 }
 
 // Crypto functions

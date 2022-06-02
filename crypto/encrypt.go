@@ -5,11 +5,10 @@ import (
 	"io"
 )
 
+// Encrypt a byte array
+//
+// This function accepts an incoming byte array, encrypts it using AES-256 decryption and returns the result in bytes
 func EncryptBytes(data []byte) []byte {
-	/**
-	Encrypt a byte array
-	*/
-
 	gcm := newCipherAESGCMObject()
 	if gcm == nil {
 		return nil
@@ -30,11 +29,10 @@ func EncryptBytes(data []byte) []byte {
 	return encrypted_bytes
 }
 
+// Encrypt a byte array
+//
+// This function accepts an incoming string, encrypts it using EncryptBytes func and returns the result in bytes
 func EncryptString(data string) []byte {
-	/**
-	Decrypt a string
-	*/
-
 	// Convert incoming string to bytes
 	var byte_data = []byte(data)
 
