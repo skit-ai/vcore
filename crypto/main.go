@@ -43,7 +43,7 @@ func getApproleAuth() *auth.AppRoleAuth {
 	return appRoleAuth
 }
 
-func getDataKey() []byte {
+func getDataKey(encrypted_data_key_ string) (data_key []byte) {
 	if len(data_key) != 0 {
 		return data_key
 	}
@@ -70,9 +70,18 @@ func getDataKey() []byte {
 		Secret: secret_,
 	})
 
+	// Check if data key is passed as a parameter
+	var ciphertext string
+
+	if encrypted_data_key_ != "" {
+		ciphertext = encrypted_data_key_
+	} else {
+		ciphertext = encrypted_data_key
+	}
+
 	// Decrypt the encrypted data key
 	data := map[string]interface{}{
-		"ciphertext": encrypted_data_key,
+		"ciphertext": ciphertext,
 	}
 	secret, err := client.Logical().Write("/transit/decrypt/"+vault_data_key_name, data)
 	if err != nil {
@@ -80,18 +89,19 @@ func getDataKey() []byte {
 	}
 
 	// Set data_key to plaintext value
-	data_key, err := base64.StdEncoding.DecodeString(secret.Data["plaintext"].(string))
+	data_key, err = base64.StdEncoding.DecodeString(secret.Data["plaintext"].(string))
 	if err != nil {
 		return nil
 	}
 
-	return data_key
+	return
 }
 
 // Crypto functions
-func newCipherAESGCMObject() cipher.AEAD {
+func newCipherAESGCMObject(data_key_b64_str string) (gcm cipher.AEAD) {
+
 	// Get data key
-	var data_key = getDataKey()
+	data_key := getDataKey(data_key_b64_str)
 
 	// Generate new aes cipher using our 32 byte key
 	c, err := aes.NewCipher(data_key)
@@ -100,10 +110,10 @@ func newCipherAESGCMObject() cipher.AEAD {
 	}
 
 	// GCM or Galois/Counter Mode, is a mode of operation for symmetric key cryptographic block ciphers
-	gcm, err := cipher.NewGCM(c)
+	gcm, err = cipher.NewGCM(c)
 	if err != nil {
 		return nil
 	}
 
-	return gcm
+	return
 }
