@@ -2,6 +2,7 @@ package crypto
 
 import (
 	"crypto/rand"
+	"encoding/base64"
 	"io"
 )
 
@@ -38,4 +39,22 @@ func EncryptString(data string) []byte {
 
 	// Encrypt bytes
 	return EncryptBytes(byte_data)
+}
+
+// Encrypt a string
+//
+// This function accepts an incoming string, encrypts it using EncryptBytes func,
+// encodes the bytearray to base64 string and returns the resultant string
+func EncryptToB64String(data string) (encrypted_data_b64_str string, err error) {
+
+	// Convert incoming string to bytes
+	var byte_data = []byte(data)
+
+	// Encrypt bytes
+	encrypted_data_bytes := EncryptBytes(byte_data)
+
+	// Encode encrypted bytes to b64 string
+	encrypted_data_b64_str = base64.StdEncoding.EncodeToString(encrypted_data_bytes)
+
+	return
 }
