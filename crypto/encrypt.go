@@ -13,8 +13,8 @@ Encryption functions with data key
 // Encrypt a byte array
 //
 // This function accepts an incoming byte array, encrypts it using AES-256 decryption and returns the result in bytes
-func EncryptBytesWithDataKey(data []byte, data_key string) []byte {
-	gcm := newCipherAESGCMObject(data_key)
+func EncryptBytesWithDataKey(data []byte, data_key string, clientId string) []byte {
+	gcm := newCipherAESGCMObject(data_key, clientId)
 	if gcm == nil {
 		return nil
 	}
@@ -37,25 +37,25 @@ func EncryptBytesWithDataKey(data []byte, data_key string) []byte {
 // Encrypt a byte array
 //
 // This function accepts an incoming string, encrypts it using EncryptBytes func and returns the result in bytes.
-func EncryptStringWithDataKey(data string, data_key string) []byte {
+func EncryptStringWithDataKey(data string, data_key string, clientId string) []byte {
 	// Convert incoming string to bytes
 	var byte_data = []byte(data)
 
 	// Encrypt bytes
-	return EncryptBytesWithDataKey(byte_data, data_key)
+	return EncryptBytesWithDataKey(byte_data, data_key, clientId)
 }
 
 // Encrypt a string
 //
 // This function accepts an incoming string, encrypts it using EncryptBytes func,
 // encodes the bytearray to base64 string and returns the resultant string.
-func EncryptToB64StringWithDataKey(data string, data_key string) (encrypted_data_b64_str string, err error) {
+func EncryptToB64StringWithDataKey(data string, data_key string, clientId string) (encrypted_data_b64_str string, err error) {
 
 	// Convert incoming string to bytes
 	var byte_data = []byte(data)
 
 	// Encrypt bytes
-	encrypted_data_bytes := EncryptBytesWithDataKey(byte_data, data_key)
+	encrypted_data_bytes := EncryptBytesWithDataKey(byte_data, data_key, clientId)
 
 	// Encode encrypted bytes to b64 string
 	encrypted_data_b64_str = base64.StdEncoding.EncodeToString(encrypted_data_bytes)
@@ -72,7 +72,7 @@ Encryption functions without data key
 //
 // This function accepts an incoming byte array, encrypts it using AES-256 decryption and returns the result in bytes
 func EncryptBytes(data []byte) []byte {
-	gcm := newCipherAESGCMObject("")
+	gcm := newCipherAESGCMObject("", "")
 	if gcm == nil {
 		return nil
 	}
@@ -100,7 +100,7 @@ func EncryptString(data string) []byte {
 	var byte_data = []byte(data)
 
 	// Encrypt bytes
-	return EncryptBytesWithDataKey(byte_data, "")
+	return EncryptBytesWithDataKey(byte_data, "", "")
 }
 
 // Encrypt a string
@@ -113,7 +113,7 @@ func EncryptToB64String(data string) (encrypted_data_b64_str string, err error) 
 	var byte_data = []byte(data)
 
 	// Encrypt bytes
-	encrypted_data_bytes := EncryptBytesWithDataKey(byte_data, "")
+	encrypted_data_bytes := EncryptBytesWithDataKey(byte_data, "", "")
 
 	// Encode encrypted bytes to b64 string
 	encrypted_data_b64_str = base64.StdEncoding.EncodeToString(encrypted_data_bytes)
