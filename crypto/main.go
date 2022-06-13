@@ -24,7 +24,7 @@ var encrypted_data_key string = os.Getenv("ENCRYPTED_DATA_KEY")
 // Other Global Variables
 
 var data_key []byte
-var dataKeyCache map[string][]byte
+var dataKeyCache map[string][]byte = map[string][]byte{}
 
 // Vault functions
 func getApproleAuth() *auth.AppRoleAuth {
