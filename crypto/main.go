@@ -120,6 +120,11 @@ func getDataKey(encrypted_data_key_ string, clientId string) (data_key_ []byte) 
 		return nil
 	}
 
+	// Set clientId based cache
+	if clientId != "" {
+		dataKeyCache[clientId] = data_key_
+	}
+
 	// Set global data_key
 	if isGlobal {
 		data_key = data_key_
