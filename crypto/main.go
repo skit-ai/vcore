@@ -24,6 +24,7 @@ var encrypted_data_key string = os.Getenv("ENCRYPTED_DATA_KEY")
 // Other Global Variables
 
 var data_key []byte
+var dataKeyCache map[string][]byte
 
 // Vault functions
 func getApproleAuth() *auth.AppRoleAuth {
@@ -43,10 +44,25 @@ func getApproleAuth() *auth.AppRoleAuth {
 	return appRoleAuth
 }
 
-func getDataKey(encrypted_data_key_ string) (data_key []byte) {
-	if len(data_key) != 0 {
-		return data_key
+func getDataKey(encrypted_data_key_ string, clientId string) (data_key_ []byte) {
+
+	var cachedKeyPresent bool
+
+	if clientId != "" {
+		data_key_, cachedKeyPresent = dataKeyCache[clientId]
 	}
+
+	if cachedKeyPresent {
+		return
+	}
+
+	// If clientId is not provided, check if global data key is set (environment variable)
+	if len(data_key) != 0 && clientId == "" {
+		data_key_ = data_key
+		return
+	}
+
+	// If no cache value found, retrieve unencrypted data key value from vault
 
 	// Initialize vault client
 	config := &api.Config{
@@ -57,6 +73,7 @@ func getDataKey(encrypted_data_key_ string) (data_key []byte) {
 		return nil
 	}
 
+	// Initialize approle auth
 	appRoleAuth := getApproleAuth()
 	secret_, err := client.Auth().Login(context.TODO(), appRoleAuth)
 	if err != nil {
@@ -72,36 +89,50 @@ func getDataKey(encrypted_data_key_ string) (data_key []byte) {
 
 	// Check if data key is passed as a parameter
 	var ciphertext string
+	var isGlobal bool = false
+	var vaultDataKeyName_ string
 
 	if encrypted_data_key_ != "" {
 		ciphertext = encrypted_data_key_
 	} else {
 		ciphertext = encrypted_data_key
+		isGlobal = true
+	}
+
+	if clientId != "" {
+		vaultDataKeyName_ = clientId
+	} else {
+		vaultDataKeyName_ = vault_data_key_name
 	}
 
 	// Decrypt the encrypted data key
 	data := map[string]interface{}{
 		"ciphertext": ciphertext,
 	}
-	secret, err := client.Logical().Write("/transit/decrypt/"+vault_data_key_name, data)
+	secret, err := client.Logical().Write("/transit/decrypt/"+vaultDataKeyName_, data)
 	if err != nil {
 		return nil
 	}
 
-	// Set data_key to plaintext value
-	data_key, err = base64.StdEncoding.DecodeString(secret.Data["plaintext"].(string))
+	// Set data_key_ to plaintext value
+	data_key_, err = base64.StdEncoding.DecodeString(secret.Data["plaintext"].(string))
 	if err != nil {
 		return nil
+	}
+
+	// Set global data_key
+	if isGlobal {
+		data_key = data_key_
 	}
 
 	return
 }
 
 // Crypto functions
-func newCipherAESGCMObject(data_key_b64_str string) (gcm cipher.AEAD) {
+func newCipherAESGCMObject(data_key_b64_str string, clientId string) (gcm cipher.AEAD) {
 
 	// Get data key
-	data_key := getDataKey(data_key_b64_str)
+	data_key := getDataKey(data_key_b64_str, clientId)
 
 	// Generate new aes cipher using our 32 byte key
 	c, err := aes.NewCipher(data_key)
