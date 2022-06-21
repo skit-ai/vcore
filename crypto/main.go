@@ -134,7 +134,7 @@ func getDataKey(encrypted_data_key_ string, clientId string) (data_key_ []byte) 
 }
 
 // Crypto functions
-func newCipherAESGCMObject(data_key_b64_str string, clientId string) (gcm cipher.AEAD) {
+func newCipherAESGCMObject(data_key_b64_str string, clientId string) (gcm cipher.AEAD, err error) {
 
 	// Get data key
 	data_key := getDataKey(data_key_b64_str, clientId)
@@ -142,13 +142,13 @@ func newCipherAESGCMObject(data_key_b64_str string, clientId string) (gcm cipher
 	// Generate new aes cipher using our 32 byte key
 	c, err := aes.NewCipher(data_key)
 	if err != nil {
-		return nil
+		return
 	}
 
 	// GCM or Galois/Counter Mode, is a mode of operation for symmetric key cryptographic block ciphers
 	gcm, err = cipher.NewGCM(c)
 	if err != nil {
-		return nil
+		return
 	}
 
 	return

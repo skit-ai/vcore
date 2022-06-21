@@ -13,10 +13,10 @@ Encryption functions with data key
 // Encrypt a byte array
 //
 // This function accepts an incoming byte array, encrypts it using AES-256 decryption and returns the result in bytes
-func EncryptBytesWithDataKey(data []byte, data_key string, clientId string) []byte {
-	gcm := newCipherAESGCMObject(data_key, clientId)
-	if gcm == nil {
-		return nil
+func EncryptBytesWithDataKey(data []byte, dataKey string, clientId string) (encryptedBytes []byte, err error) {
+	gcm, err := newCipherAESGCMObject(dataKey, clientId)
+	if gcm == nil || err != nil {
+		return
 	}
 
 	// creates a new byte array the size of the nonce
@@ -25,40 +25,40 @@ func EncryptBytesWithDataKey(data []byte, data_key string, clientId string) []by
 
 	// populates our nonce with a cryptographically secure
 	// random sequence
-	if _, err := io.ReadFull(rand.Reader, nonce); err != nil {
-		return nil
+	if _, err = io.ReadFull(rand.Reader, nonce); err != nil {
+		return
 	}
 
-	encrypted_bytes := gcm.Seal(nonce, nonce, data, nil)
+	encryptedBytes = gcm.Seal(nonce, nonce, data, nil)
 
-	return encrypted_bytes
+	return
 }
 
 // Encrypt a byte array
 //
 // This function accepts an incoming string, encrypts it using EncryptBytes func and returns the result in bytes.
-func EncryptStringWithDataKey(data string, data_key string, clientId string) []byte {
+func EncryptStringWithDataKey(data string, dataKey string, clientId string) (byteData []byte, err error) {
 	// Convert incoming string to bytes
-	var byte_data = []byte(data)
+	byteData = []byte(data)
 
 	// Encrypt bytes
-	return EncryptBytesWithDataKey(byte_data, data_key, clientId)
+	return EncryptBytesWithDataKey(byteData, dataKey, clientId)
 }
 
 // Encrypt a string
 //
 // This function accepts an incoming string, encrypts it using EncryptBytes func,
 // encodes the bytearray to base64 string and returns the resultant string.
-func EncryptToB64StringWithDataKey(data string, data_key string, clientId string) (encrypted_data_b64_str string, err error) {
+func EncryptToB64StringWithDataKey(data string, dataKey string, clientId string) (encryptedDataB64Str string, err error) {
 
 	// Convert incoming string to bytes
-	var byte_data = []byte(data)
+	var byteData = []byte(data)
 
 	// Encrypt bytes
-	encrypted_data_bytes := EncryptBytesWithDataKey(byte_data, data_key, clientId)
+	encryptedDataBytes, err := EncryptBytesWithDataKey(byteData, dataKey, clientId)
 
 	// Encode encrypted bytes to b64 string
-	encrypted_data_b64_str = base64.StdEncoding.EncodeToString(encrypted_data_bytes)
+	encryptedDataB64Str = base64.StdEncoding.EncodeToString(encryptedDataBytes)
 
 	return
 }
@@ -71,10 +71,10 @@ Encryption functions without data key
 // Deprecated - to be removed in future releases - use EncryptBytesWithDataKey instead
 //
 // This function accepts an incoming byte array, encrypts it using AES-256 decryption and returns the result in bytes
-func EncryptBytes(data []byte) []byte {
-	gcm := newCipherAESGCMObject("", "")
-	if gcm == nil {
-		return nil
+func EncryptBytes(data []byte) (encryptedBytes []byte, err error) {
+	gcm, err := newCipherAESGCMObject("", "")
+	if gcm == nil || err != nil {
+		return
 	}
 
 	// creates a new byte array the size of the nonce
@@ -83,40 +83,40 @@ func EncryptBytes(data []byte) []byte {
 
 	// populates our nonce with a cryptographically secure
 	// random sequence
-	if _, err := io.ReadFull(rand.Reader, nonce); err != nil {
-		return nil
+	if _, err = io.ReadFull(rand.Reader, nonce); err != nil {
+		return
 	}
 
-	encrypted_bytes := gcm.Seal(nonce, nonce, data, nil)
+	encryptedBytes = gcm.Seal(nonce, nonce, data, nil)
 
-	return encrypted_bytes
+	return
 }
 
 // Encrypt a byte array
 //
 // This function accepts an incoming string, encrypts it using EncryptBytes func and returns the result in bytes
-func EncryptString(data string) []byte {
+func EncryptString(data string) (byteData []byte, err error) {
 	// Convert incoming string to bytes
-	var byte_data = []byte(data)
+	byteData = []byte(data)
 
 	// Encrypt bytes
-	return EncryptBytesWithDataKey(byte_data, "", "")
+	return EncryptBytesWithDataKey(byteData, "", "")
 }
 
 // Encrypt a string
 //
 // This function accepts an incoming string, encrypts it using EncryptBytes func,
 // encodes the bytearray to base64 string and returns the resultant string
-func EncryptToB64String(data string) (encrypted_data_b64_str string, err error) {
+func EncryptToB64String(data string) (encryptedDataB64Str string, err error) {
 
 	// Convert incoming string to bytes
-	var byte_data = []byte(data)
+	var byteData = []byte(data)
 
 	// Encrypt bytes
-	encrypted_data_bytes := EncryptBytesWithDataKey(byte_data, "", "")
+	encryptedDataBytes, err := EncryptBytesWithDataKey(byteData, "", "")
 
 	// Encode encrypted bytes to b64 string
-	encrypted_data_b64_str = base64.StdEncoding.EncodeToString(encrypted_data_bytes)
+	encryptedDataB64Str = base64.StdEncoding.EncodeToString(encryptedDataBytes)
 
 	return
 }
