@@ -1,4 +1,5 @@
-// Package utils implements helper functions
+// The vcore/utils package contains basic utility functions and file utilies
+// for downloading, reading and writing to files.
 package utils
 
 import (

@@ -87,10 +87,16 @@ func DecryptB64ToBytesWithDataKey(data string, dataKey string, clientId string) 
 Decryption functions without data key
 */
 
-// Decrypt a byte array
-// Deprecated - to be removed in future releases - use DecryptBytesWithDataKey instead
+// Decrypt a byte array Deprecated - to be removed in future releases - use
+// DecryptBytesWithDataKey instead
 //
-// This function accepts an incoming byte array, decrypts it using AES-256 decryption and returns the result in bytes
+// This function accepts an incoming byte array, decrypts it using AES-256
+// decryption and returns the result in bytes
+//
+// Example usage:
+//  y := []byte{180, 27, 0, 28, 249, 65, 157, 217, 78, 134, 227, 25, 135, 180, 197, 2, 170, 235, 128, 7, 99, 202, 202, 210, 149, 75, 209, 157, 114, 129, 236, 206, 62, 132, 175, 42, 26, 224, 26}
+//  p := DecryptBytes(y)
+//  fmt.Println(string(p))
 func DecryptBytes(cipherData []byte) (data []byte, err error) {
 	gcm, err := newCipherAESGCMObject("", "")
 	if gcm == nil || err != nil {

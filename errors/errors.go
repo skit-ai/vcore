@@ -1,3 +1,49 @@
+// The errors package is a wrapper around the brilliant
+// https://github.com/pkg/errors library. The major difference between
+// https://github.com/pkg/errors and this library is support for the following:
+//
+// • Wrapping of an error into a custom error so as to add a stacktrace.
+//
+// • Allows creation of errors with a stack which have no cause(nil cause).
+//
+// • Every error created supports the `fatality` interface which is meant to inform us if the error is fatal or not.
+//
+// • Every error created supports the `tagged` interface which returns any tags(`map[string]string`) associated with an error.
+//
+// • The stacktrace of the error will return the stactrace starting from the deepest cause.
+//
+// Create Error without cause
+//
+// This error is non-fatal. As marked by the last bool flag.
+//
+//    errors.NewError("Error without a cause", nil, false)
+//
+// Create Error with a cause
+//
+// Embedding a cause with the error.
+//    cause := errors.NewError("Error without a cause", nil, false)
+//    errWithCause := errors.NewError("Error with a cause", cause, false)
+//
+// Check if an error is fatal
+//
+// Sample below:
+//     cause := errors.NewError("Error without a cause", nil, false)
+//     if cause.Fatal{
+//         fmt.Println("This error is fatal.")
+//     }
+//
+// Get the stacktrace of the error and print it
+//
+// Sample below:
+//    cause := errors.NewError("Error without a cause", nil, false)
+//    errWithCause := errors.NewError("Error with a cause", cause, false)
+//    fmt.Println(errWithCause.Stacktrace())
+//
+// Alternatively,
+//
+//    cause := errors.NewError("Error without a cause", nil, false)
+//    errWithCause := errors.NewError("Error with a cause", cause, false)
+//    errWithCause.PrintStackTrace()
 package errors
 
 import (
