@@ -3,7 +3,7 @@ package crypto
 import (
 	"encoding/base64"
 
-	"github.com/Vernacular-ai/vcore/errors"
+	"github.com/skit-ai/vcore/errors"
 )
 
 // Decrypt a byte array
