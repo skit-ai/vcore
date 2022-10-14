@@ -408,3 +408,11 @@ func ConvertInterfaceToString(val interface{}) (string, bool) {
 	stringValue, ok := val.(string)
 	return stringValue, ok
 }
+
+// GetEnv - Return the fallback env if not present
+func GetEnv(key, fallback string) string {
+	if value, ok := os.LookupEnv(key); ok {
+		return value
+	}
+	return fallback
+}
