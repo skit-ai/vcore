@@ -4,6 +4,7 @@ import (
 	"context"
 	"net/http"
 	"os"
+	"strconv"
 
 	"github.com/Vernacular-ai/vcore/errors"
 	"github.com/Vernacular-ai/vcore/log"
@@ -23,6 +24,9 @@ type Sentry struct {
 
 func InitSentry(release string) (client *Sentry) {
 	dsn := os.Getenv("SENTRY_DSN")
+
+	sampleRate, _ := strconv.ParseFloat(os.Getenv("SENTRY_SAMPLING"), 64)
+
 	if release == "" {
 		release = os.Getenv("SENTRY_RELEASE")
 	}
@@ -35,7 +39,8 @@ func InitSentry(release string) (client *Sentry) {
 
 			// Enable debugging to check connectivity
 			//Debug: true,
-			Release: release,
+			Release:    release,
+			SampleRate: sampleRate,
 
 			Environment: os.Getenv("ENVIRONMENT"),
 		}); err != nil {
