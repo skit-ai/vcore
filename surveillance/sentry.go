@@ -87,7 +87,9 @@ func (wrapper *Sentry) Capture(err error, _panic bool) sentry.EventID {
 
 				// Capturing the error on Sentry
 				eventID = sentry.CaptureException(err)
-				log.Errorf(err, "Error captured in sentry with the event ID `%s`", *eventID)
+				if eventID != nil {
+					log.Errorf(err, "Error captured in sentry with the event ID `%s`", *eventID)
+				}
 
 				return
 			})
