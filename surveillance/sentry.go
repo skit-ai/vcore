@@ -86,6 +86,7 @@ func (wrapper *Sentry) Capture(err error, _panic bool) sentry.EventID {
 				scope.SetTags(errors.Tags(err))
 
 				// Capturing the error on Sentry
+				// eventID can be nil when sample rate is used
 				eventID = sentry.CaptureException(err)
 				if eventID != nil {
 					log.Errorf(err, "Error captured in sentry with the event ID `%s`", *eventID)
