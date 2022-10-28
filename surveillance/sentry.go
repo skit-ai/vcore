@@ -104,7 +104,11 @@ func (wrapper *Sentry) Capture(err error, _panic bool) sentry.EventID {
 		}
 	}
 
-	return *eventID
+	if eventID != nil {
+		return *eventID
+	}
+
+	return ""
 }
 
 // Handles an error by capturing it on Sentry and logging the same on STDOUT
