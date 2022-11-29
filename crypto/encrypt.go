@@ -67,10 +67,16 @@ func EncryptToB64StringWithDataKey(data string, dataKey string, clientId string)
 Encryption functions without data key
 */
 
-// Encrypt a byte array
-// Deprecated - to be removed in future releases - use EncryptBytesWithDataKey instead
+// Encrypt a byte array (deprecated)
+// to be removed in future releases, use EncryptBytesWithDataKey instead
 //
-// This function accepts an incoming byte array, encrypts it using AES-256 decryption and returns the result in bytes
+// This function accepts an incoming byte array, encrypts it using AES-256
+// decryption and returns the result in bytes
+//
+// Example usage:
+//  x := []byte("hello world")
+//  enc := EncryptBytes(x)
+//  fmt.Println(enc)
 func EncryptBytes(data []byte) (encryptedBytes []byte, err error) {
 	gcm, err := newCipherAESGCMObject("", "")
 	if gcm == nil || err != nil {
@@ -94,7 +100,13 @@ func EncryptBytes(data []byte) (encryptedBytes []byte, err error) {
 
 // Encrypt a byte array
 //
-// This function accepts an incoming string, encrypts it using EncryptBytes func and returns the result in bytes
+// This function accepts an incoming string, encrypts it using EncryptBytes
+// func and returns the result in bytes
+//
+// Example usage:
+//  x := "hello world"
+//  enc := EncryptString(x)
+//  fmt.Println(enc)
 func EncryptString(data string) (byteData []byte, err error) {
 	// Convert incoming string to bytes
 	byteData = []byte(data)

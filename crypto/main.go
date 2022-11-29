@@ -1,4 +1,36 @@
-// A module to help with cryptographic requirements like encryption and hashing
+// The crypto module is meant to help services implement various cryptographic
+// functions with ease.
+//
+// Current features
+//
+// 1. Encryption of []byte and string.
+//
+// Supported techniques: AES-256-GCM
+//
+// 2. Decryption of []byte.
+//
+// Supported techniques: AES-256-GCM
+//
+// AES-256 is PCI DSS compliant, as it is a recognised industry standard
+// encryption.
+//
+// Key management
+//
+// Vault is used to generate the encrypted data key when an environment/client is set up. The encrypted data key is passed to vcore as an environment variable.
+// Vcore then calls Vault APIs to decrypt the data key and proceed with the encryption/decryption.
+//
+// Environment Variables needed
+//
+// The following environment variables are needed to utilize the crypto module:
+//
+//     export VAULT_URI="http://localhost:8200"
+//     export VAULT_ROLE_ID="****"
+//     export VAULT_SECRET_ID="****"
+//     export VAULT_APPROLE_MOUNTPATH="approle"
+//     export ENCRYPTED_DATA_KEY="****"
+//     export VAULT_DATA_KEY_NAME="datakey-name"
+//
+// Note: the above environment variables are just examples, set up vault and replace the actual values above.
 package crypto
 
 import (
