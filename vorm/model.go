@@ -3,7 +3,7 @@ package vorm
 import (
 	"database/sql/driver"
 	"fmt"
-	"github.com/Vernacular-ai/vcore/errors"
+	"github.com/skit-ai/vcore/errors"
 	"os"
 	"strconv"
 	"time"

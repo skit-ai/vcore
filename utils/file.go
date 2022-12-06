@@ -12,7 +12,7 @@ import (
 
 	"gopkg.in/yaml.v2"
 
-	"github.com/Vernacular-ai/vcore/errors"
+	"github.com/skit-ai/vcore/errors"
 
 	"github.com/hashicorp/go-getter"
 )

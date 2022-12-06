@@ -1,4 +1,4 @@
-module github.com/Vernacular-ai/vcore
+module github.com/skit-ai/vcore
 
 go 1.19
 

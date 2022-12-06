@@ -19,9 +19,9 @@ import (
 	"strings"
 	"time"
 
-	"github.com/Vernacular-ai/vcore/errors"
-	"github.com/Vernacular-ai/vcore/surveillance"
 	"github.com/getsentry/sentry-go"
+	"github.com/skit-ai/vcore/errors"
+	"github.com/skit-ai/vcore/surveillance"
 
 	"github.com/google/go-cmp/cmp"
 )

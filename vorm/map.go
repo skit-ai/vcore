@@ -4,9 +4,9 @@ import (
 	"database/sql/driver"
 	"encoding/json"
 	"fmt"
-	"github.com/Vernacular-ai/vcore/errors"
-	"github.com/Vernacular-ai/vcore/log"
-	"github.com/Vernacular-ai/vcore/surveillance"
+	"github.com/skit-ai/vcore/errors"
+	"github.com/skit-ai/vcore/log"
+	"github.com/skit-ai/vcore/surveillance"
 	"reflect"
 )
 
