@@ -2,7 +2,7 @@ package log
 
 import (
 	"fmt"
-	"github.com/Vernacular-ai/vcore/errors"
+	"github.com/skit-ai/vcore/errors"
 	"log"
 	"strings"
 )

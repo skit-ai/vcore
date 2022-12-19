@@ -4,7 +4,7 @@ import (
 	"context"
 	"testing"
 
-	"github.com/Vernacular-ai/vcore/utils"
+	"github.com/skit-ai/vcore/utils"
 )
 
 func TestWriteToFile(t *testing.T) {
