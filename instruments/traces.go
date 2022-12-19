@@ -26,7 +26,7 @@ var (
 	OtelEnable, _     = strconv.ParseBool(os.Getenv("OTEL_ENABLE"))
 	serviceName       = os.Getenv("OTEL_SERVICE_NAME")
 	collectorEndpoint = os.Getenv("OTEL_COLLECTOR_ENDPOINT")
-    useTls, _         = strconv.ParseBool(os.Getenv("OTEL_USE_TLS"))
+	useTls, _         = strconv.ParseBool(os.Getenv("OTEL_USE_TLS"))
 )
 
 // Initializes an OTLP exporter, and configures the corresponding trace and
