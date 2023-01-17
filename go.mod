@@ -4,6 +4,7 @@ go 1.19
 
 require (
 	github.com/Vernacular-ai/gorm v1.11.3
+	github.com/aws/aws-sdk-go v1.44.153
 	github.com/getsentry/sentry-go v0.15.0
 	github.com/google/go-cmp v0.5.9
 	github.com/hashicorp/go-getter v1.6.2
@@ -28,7 +29,6 @@ require (
 	cloud.google.com/go/storage v1.28.1 // indirect
 	github.com/armon/go-metrics v0.4.1 // indirect
 	github.com/armon/go-radix v1.0.0 // indirect
-	github.com/aws/aws-sdk-go v1.44.153 // indirect
 	github.com/bgentry/go-netrc v0.0.0-20140422174119-9fd32a8b3d3d // indirect
 	github.com/cenkalti/backoff/v3 v3.2.2 // indirect
 	github.com/erikstmartin/go-testdb v0.0.0-20160219214506-8d10e4a1bae5 // indirect
