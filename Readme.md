@@ -164,6 +164,40 @@ customLogger := log.Logger{log.DEBUG}
 customLogger.Debug("This is a debug message")
 ```
 
+## vcore/events
+
+### Sending Cost Tracker Event
+
+First export `AWS_CREDENTIALS`
+
+```sh
+export AWS_ACCESS_KEY_ID=AKID
+export AWS_SECRET_ACCESS_KEY=SECRET
+export AWS_REGION=us-east-1
+```
+
+Then use events package from the lib
+```go
+import (
+    "github.com/Vernacular-ai/vcore/events"
+)
+
+// If you don't want to export AWS_CREDENTIALS or already have them under different name, call
+// `SetAWSCredentials` while initializing the module
+events.SetAWSCredentials(awsAccessKey, awsSecretKey, awsRegion)
+
+// send the actual cost event
+err = events.SendCostEvent(
+    events.NewCostEvent(events.ASR, events.GOOGLE, "client-uuid", "flow-uuid", "call-uuid", "conv-uuid")
+)
+
+// if you want to count a single event with multiple hits
+err = events.SendCostEvent(
+    events.NewCostEventWithNumHits(events.ASR, events.GOOGLE, "client-uuid", "flow-uuid", "call-uuid", "conv-uuid", 2)
+)
+```
+
+
 ## vcore/transport
 
 ### vcore/transport/amqp
@@ -171,6 +205,6 @@ customLogger.Debug("This is a debug message")
 
 ## vcore/utils
 
-The vcore/utils package contains basic utility functions and file utilies for downloading, reading and writing to files.
+The vcore/utils package contains basic utility functions and file utilities for downloading, reading and writing to files.
 
 ## vcore/vorm

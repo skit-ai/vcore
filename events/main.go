@@ -12,12 +12,14 @@ const (
 	ASR Service = "ASR"
 	TTS Service = "TTS"
 	SLU Service = "SLU"
+	LID Service = "LID"
 )
 
 const (
 	GOOGLE Vendor = "GOOGLE"
 	SKIT   Vendor = "SKIT"
 	AZURE  Vendor = "AZURE"
+	SHORT_UTTERANCE Vendor = "SHORT_UTTERANCE"
 )
 
 type CostEvent struct {

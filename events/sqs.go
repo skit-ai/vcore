@@ -4,35 +4,71 @@ import (
 	"encoding/json"
 
 	"github.com/aws/aws-sdk-go/aws"
-	"github.com/aws/aws-sdk-go/aws/session"
+	awsSession "github.com/aws/aws-sdk-go/aws/session"
+	"github.com/aws/aws-sdk-go/aws/credentials"
 	"github.com/aws/aws-sdk-go/service/sqs"
 )
 
-var WAREHOUSE_QUEUE_URL string = "https://sqs.ap-south-1.amazonaws.com/536612919621/warehouse-data-transfer"
-var AWS_SESSION *session.Session = nil
+var AWS_SESSION *awsSession.Session = nil
+var WAREHOUSE_QUEUE_NAME string = "warehouse-data-transfer"
+var WAREHOUSE_QUEUE_URL *string
 
 
-func getSQSSession() *session.Session {
+func getSQSSession() (*awsSession.Session, error) {
 	if AWS_SESSION != nil {
-		return AWS_SESSION
+		return AWS_SESSION, nil
 	}
+	// create session from default env variables
+	session, err := awsSession.NewSession()
+	AWS_SESSION = awsSession.Must(session, err)
 
-	return session.Must(session.NewSessionWithOptions(session.Options{
-		SharedConfigState: session.SharedConfigEnable,
-	}))
+	return AWS_SESSION, nil
+}
+
+
+func getQueueURL(svc *sqs.SQS, queue *string) (*string, error) {
+    result, err := svc.GetQueueUrl(&sqs.GetQueueUrlInput{
+        QueueName: queue,
+    })
+    if err != nil {
+        return nil, err
+    }
+
+    return result.QueueUrl, nil
+}
+
+
+func SetAWSCredentials(awsAccessKey, awsSecretKey, awsRegion string) error {
+	session, err := awsSession.NewSession(&aws.Config{
+		Region: aws.String(awsRegion),
+		Credentials: credentials.NewStaticCredentials(awsAccessKey,awsSecretKey, ""),
+	})
+	AWS_SESSION = awsSession.Must(session, err)
+
+	return err
 }
 
 
 func SendCostEvent(costEvent CostEvent) error {
-	session := getSQSSession()
+	session, err := getSQSSession()
+	if err != nil {
+		return err
+	}
+
 	svc := sqs.New(session)
+	if WAREHOUSE_QUEUE_URL == nil {
+		WAREHOUSE_QUEUE_URL, err = getQueueURL(svc, &WAREHOUSE_QUEUE_NAME)
+	}
+	if err != nil {
+		return err
+	}
 
 	body, jsonErr := json.Marshal(costEvent)
 	if jsonErr != nil {
 		return jsonErr
 	}
 
-	_, err := svc.SendMessage(&sqs.SendMessageInput{
+	_, err = svc.SendMessage(&sqs.SendMessageInput{
 		MessageAttributes: map[string]*sqs.MessageAttributeValue{
 			"EventType": {
 				DataType:    aws.String("String"),
@@ -40,7 +76,7 @@ func SendCostEvent(costEvent CostEvent) error {
 			},
 		},
 		MessageBody: aws.String(string(body)),
-		QueueUrl:    &WAREHOUSE_QUEUE_URL,
+		QueueUrl:    WAREHOUSE_QUEUE_URL,
 	})
 
 	return err
