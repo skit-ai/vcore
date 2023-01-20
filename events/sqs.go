@@ -1,6 +1,7 @@
 package events
 
 import (
+	"fmt"
 	"encoding/json"
 
 	"github.com/aws/aws-sdk-go/aws"
@@ -49,35 +50,39 @@ func SetAWSCredentials(awsAccessKey, awsSecretKey, awsRegion string) error {
 }
 
 
-func SendCostEvent(costEvent CostEvent) error {
-	session, err := getSQSSession()
-	if err != nil {
-		return err
-	}
+func SendCostEvent(costEvent CostEvent) {
+	go func() {
+		session, err := getSQSSession()
+		if err != nil {
+			fmt.Println("SendCostEvent: ", err)
+			return
+		}
 
-	svc := sqs.New(session)
-	if WAREHOUSE_QUEUE_URL == nil {
-		WAREHOUSE_QUEUE_URL, err = getQueueURL(svc, &WAREHOUSE_QUEUE_NAME)
-	}
-	if err != nil {
-		return err
-	}
+		svc := sqs.New(session)
+		if WAREHOUSE_QUEUE_URL == nil {
+			WAREHOUSE_QUEUE_URL, err = getQueueURL(svc, &WAREHOUSE_QUEUE_NAME)
+		}
+		if err != nil {
+			fmt.Println("SendCostEvent: ", err)
+			return
+		}
 
-	body, jsonErr := json.Marshal(costEvent)
-	if jsonErr != nil {
-		return jsonErr
-	}
+		body, jsonErr := json.Marshal(costEvent)
+		if jsonErr != nil {
+			fmt.Println("SendCostEvent: ", err)
+			return
+		}
 
-	_, err = svc.SendMessage(&sqs.SendMessageInput{
-		MessageAttributes: map[string]*sqs.MessageAttributeValue{
-			"EventType": {
-				DataType:    aws.String("String"),
-				StringValue: aws.String(string(WAREHOUSE_COST_TRACKER)),
+		_, err = svc.SendMessage(&sqs.SendMessageInput{
+			MessageAttributes: map[string]*sqs.MessageAttributeValue{
+				"EventType": {
+					DataType:    aws.String("String"),
+					StringValue: aws.String(string(WAREHOUSE_COST_TRACKER)),
+				},
 			},
-		},
-		MessageBody: aws.String(string(body)),
-		QueueUrl:    WAREHOUSE_QUEUE_URL,
-	})
-
-	return err
+			MessageBody: aws.String(string(body)),
+			QueueUrl:    WAREHOUSE_QUEUE_URL,
+		})
+		fmt.Println("SendCostEvent: ", err)
+	}()
 }

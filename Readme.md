@@ -184,15 +184,15 @@ import (
 
 // If you don't want to export AWS_CREDENTIALS or already have them under different name, call
 // `SetAWSCredentials` while initializing the module
-events.SetAWSCredentials(awsAccessKey, awsSecretKey, awsRegion)
+err = events.SetAWSCredentials(awsAccessKey, awsSecretKey, awsRegion)
 
 // send the actual cost event
-err = events.SendCostEvent(
+events.SendCostEvent(
     events.NewCostEvent(events.ASR, events.GOOGLE, "client-uuid", "flow-uuid", "call-uuid", "conv-uuid")
 )
 
 // if you want to count a single event with multiple hits
-err = events.SendCostEvent(
+events.SendCostEvent(
     events.NewCostEventWithNumHits(events.ASR, events.GOOGLE, "client-uuid", "flow-uuid", "call-uuid", "conv-uuid", 2)
 )
 ```
