@@ -54,7 +54,7 @@ func SendCostEvent(costEvent CostEvent) {
 	go func() {
 		session, err := getSQSSession()
 		if err != nil {
-			fmt.Println("SendCostEvent: ", err)
+			fmt.Println("SendCostEvent Err: ", err)
 			return
 		}
 
@@ -63,13 +63,13 @@ func SendCostEvent(costEvent CostEvent) {
 			WAREHOUSE_QUEUE_URL, err = getQueueURL(svc, &WAREHOUSE_QUEUE_NAME)
 		}
 		if err != nil {
-			fmt.Println("SendCostEvent: ", err)
+			fmt.Println("SendCostEvent Err: ", err)
 			return
 		}
 
 		body, jsonErr := json.Marshal(costEvent)
 		if jsonErr != nil {
-			fmt.Println("SendCostEvent: ", err)
+			fmt.Println("SendCostEvent Err: ", err)
 			return
 		}
 
@@ -83,6 +83,8 @@ func SendCostEvent(costEvent CostEvent) {
 			MessageBody: aws.String(string(body)),
 			QueueUrl:    WAREHOUSE_QUEUE_URL,
 		})
-		fmt.Println("SendCostEvent: ", err)
+		if err != nil {
+			fmt.Println("SendCostEvent Err: ", err)
+		}
 	}()
 }
