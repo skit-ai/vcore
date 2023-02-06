@@ -13,13 +13,22 @@ const (
 	TTS Service = "TTS"
 	SLU Service = "SLU"
 	LID Service = "LID"
+	SMS Service = "SMS"
+	TELEPHONY Service = "TELEPHONY"
 )
 
 const (
+	NONE Vendor = "NONE"
 	GOOGLE Vendor = "GOOGLE"
 	SKIT   Vendor = "SKIT"
 	AZURE  Vendor = "AZURE"
 	SHORT_UTTERANCE Vendor = "SHORT_UTTERANCE"
+	TCN Vendor = "TCN"
+	TWILIO Vendor = "TWILIO"
+	FAST2SMS Vendor = "FAST2SMS"
+	TWO_FA Vendor = "TWO_FA"
+	MY_OPERATOR Vendor = "MY_OPERATOR"
+	MSG91 Vendor = "MSG91"
 )
 
 type CostEvent struct {
