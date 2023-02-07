@@ -22,6 +22,7 @@ const (
 	GOOGLE Vendor = "GOOGLE"
 	SKIT   Vendor = "SKIT"
 	AZURE  Vendor = "AZURE"
+	AMAZON Vendor = "AMAZON"
 	SHORT_UTTERANCE Vendor = "SHORT_UTTERANCE"
 	TCN Vendor = "TCN"
 	TWILIO Vendor = "TWILIO"
