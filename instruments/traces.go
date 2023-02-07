@@ -51,7 +51,7 @@ func InitProvider() (func(context.Context) error, error) {
         grpc.WithBlock(),
     }
     if useTls {
-        opts = append(opts, grpc.WithTransportCredentials(credentials.NewTLS(&tls.Config{})))
+        opts = append(opts, grpc.WithTransportCredentials(credentials.NewTLS(&tls.Config{MinVersion: tls.VersionTLS12})))
     } else {
         opts = append(opts, grpc.WithTransportCredentials(insecure.NewCredentials()))
     }
