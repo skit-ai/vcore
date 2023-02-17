@@ -7,7 +7,7 @@ require (
 	github.com/aws/aws-sdk-go v1.44.153
 	github.com/getsentry/sentry-go v0.15.0
 	github.com/google/go-cmp v0.5.9
-	github.com/hashicorp/go-getter v1.6.2
+	github.com/hashicorp/go-getter v1.7.0
 	github.com/hashicorp/vault/api v1.8.2
 	github.com/hashicorp/vault/api/auth/approle v0.3.0
 	github.com/julienschmidt/httprouter v1.3.0
