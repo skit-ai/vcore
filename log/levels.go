@@ -2,9 +2,12 @@ package log
 
 import (
 	"fmt"
-	"github.com/skit-ai/vcore/errors"
 	"log"
 	"strings"
+
+	kitLog "github.com/go-kit/log"
+	kitLevel "github.com/go-kit/log/level"
+	"github.com/skit-ai/vcore/errors"
 )
 
 const (
@@ -19,7 +22,12 @@ type Logger struct {
 	level int
 }
 
-var defaultLogger = Logger{WARN}
+// type convert func(logger kitLog.Logger) kitLog.Logger
+
+var (
+	defaultLogger = Logger{WARN}
+	KitLogger = kitLog.NewNopLogger()
+)
 
 // Prefix based on the log level to be added to every log statement
 func levelPrefix(level int) string {
@@ -175,18 +183,35 @@ func Trace(args ...interface{}) {
 }
 
 func Debug(args ...interface{}) {
+	if KitLogger != nil {
+		kitLevel.Debug(KitLogger).Log(args...)
+		return
+	}
 	defaultLogger.Debug(args...)
 }
 
 func Info(args ...interface{}) {
+	// logger.decideLogger(kitLevel.Info, INFO, args...)
+	if KitLogger != nil {
+		kitLevel.Info(KitLogger).Log(args...)
+		return
+	}
 	defaultLogger.Info(args...)
 }
 
 func Warn(args ...interface{}) {
+	if KitLogger != nil {
+		kitLevel.Warn(KitLogger).Log(args...)
+		return
+	}
 	defaultLogger.Warn(args...)
 }
 
 func Error(err error, args ...interface{}) {
+	if KitLogger != nil {
+		kitLevel.Error(KitLogger).Log(args...)
+		return
+	}
 	defaultLogger.Error(err, args...)
 }
 
