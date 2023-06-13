@@ -243,19 +243,23 @@ func Errorf(err error, format string, args ...interface{}) {
 // Methods to log messages using the logfomt logger with a trace_id
 
 func DebugWithTrace(ctx context.Context, args ...interface{}) {
-	kitLevel.Debug(KitLogger).Log(append([]any{"trace_id", instruments.ExtractTraceID(ctx).String()}, args...))
+	args = append([]any{"trace_id", instruments.ExtractTraceID(ctx).String()}, args...)
+	kitLevel.Debug(KitLogger).Log(args...)
 }
 
 func InfoWithTrace(ctx context.Context, args ...interface{}) {
-	kitLevel.Info(KitLogger).Log(append([]any{"trace_id", instruments.ExtractTraceID(ctx).String()}, args...))
+	args = append([]any{"trace_id", instruments.ExtractTraceID(ctx).String()}, args...)
+	kitLevel.Info(KitLogger).Log(args...)
 }
 
 func WarnWithTrace(ctx context.Context, args ...interface{}) {
-	kitLevel.Warn(KitLogger).Log(append([]any{"trace_id", instruments.ExtractTraceID(ctx).String()}, args...))
+	args = append([]any{"trace_id", instruments.ExtractTraceID(ctx).String()}, args...)
+	kitLevel.Warn(KitLogger).Log(args...)
 }
 
 func ErrorWithTrace(ctx context.Context, args ...interface{}) {
-	kitLevel.Error(KitLogger).Log(append([]any{"trace_id", instruments.ExtractTraceID(ctx).String()}, args...))
+	args = append([]any{"trace_id", instruments.ExtractTraceID(ctx).String()}, args...)
+	kitLevel.Error(KitLogger).Log(args...)
 }
 
 //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
