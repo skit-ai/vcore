@@ -181,6 +181,11 @@ func (logger *Logger) Error(err error, args ...interface{}) {
 // Methods to log a message using the default logger without a format
 
 func Trace(args ...interface{}) {
+	if KitLogger != nil {
+		// When logfmt is enabled, level trace becomes debug
+		kitLevel.Debug(KitLogger).Log(args...)
+		return
+	}
 	defaultLogger.Trace(args...)
 }
 
@@ -219,23 +224,45 @@ func Error(err error, args ...interface{}) {
 //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 // Methods to log messages using the default logger with a format
 
+// TODO: remove format methods
 func Tracef(format string, args ...interface{}) {
+	if KitLogger != nil {
+		// When logfmt is enabled, level trace becomes debug
+		kitLevel.Debug(KitLogger).Log(fmt.Sprintf(format, args...))
+		return
+	}
 	defaultLogger.Tracef(format, args...)
 }
 
 func Debugf(format string, args ...interface{}) {
+	if KitLogger != nil {
+		kitLevel.Debug(KitLogger).Log(fmt.Sprintf(format, args...))
+		return
+	}
 	defaultLogger.Debugf(format, args...)
 }
 
 func Infof(format string, args ...interface{}) {
+	if KitLogger != nil {
+		kitLevel.Info(KitLogger).Log(fmt.Sprintf(format, args...))
+		return
+	}
 	defaultLogger.Infof(format, args...)
 }
 
 func Warnf(format string, args ...interface{}) {
+	if KitLogger != nil {
+		kitLevel.Warn(KitLogger).Log(fmt.Sprintf(format, args...))
+		return
+	}
 	defaultLogger.Warnf(format, args...)
 }
 
 func Errorf(err error, format string, args ...interface{}) {
+	if KitLogger != nil {
+		kitLevel.Error(KitLogger).Log(fmt.Sprintf(format, args...))
+		return
+	}
 	defaultLogger.Errorf(err, format, args...)
 }
 
