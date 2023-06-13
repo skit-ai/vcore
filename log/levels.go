@@ -22,10 +22,10 @@ type Logger struct {
 	level int
 }
 
-// type convert func(logger kitLog.Logger) kitLog.Logger
-
 var (
+	// Legacy logger
 	defaultLogger = Logger{WARN}
+	// Logfmt logger
 	KitLogger = kitLog.NewNopLogger()
 )
 
@@ -191,7 +191,6 @@ func Debug(args ...interface{}) {
 }
 
 func Info(args ...interface{}) {
-	// logger.decideLogger(kitLevel.Info, INFO, args...)
 	if KitLogger != nil {
 		kitLevel.Info(KitLogger).Log(args...)
 		return
