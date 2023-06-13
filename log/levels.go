@@ -1,6 +1,7 @@
 package log
 
 import (
+	"context"
 	"fmt"
 	"log"
 	"strings"
@@ -8,6 +9,7 @@ import (
 	kitLog "github.com/go-kit/log"
 	kitLevel "github.com/go-kit/log/level"
 	"github.com/skit-ai/vcore/errors"
+	"github.com/skit-ai/vcore/instruments"
 )
 
 const (
@@ -235,6 +237,25 @@ func Warnf(format string, args ...interface{}) {
 
 func Errorf(err error, format string, args ...interface{}) {
 	defaultLogger.Errorf(err, format, args...)
+}
+
+//////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+// Methods to log messages using the logfomt logger with a trace_id
+
+func DebugWithTrace(ctx context.Context, args ...interface{}) {
+	kitLevel.Debug(KitLogger).Log("trace_id", instruments.ExtractTraceID(ctx).String(), args)
+}
+
+func InfoWithTrace(ctx context.Context, args ...interface{}) {
+	kitLevel.Info(KitLogger).Log("trace_id", instruments.ExtractTraceID(ctx).String(), args)
+}
+
+func WarnWithTrace(ctx context.Context, args ...interface{}) {
+	kitLevel.Warn(KitLogger).Log("trace_id", instruments.ExtractTraceID(ctx).String(), args)
+}
+
+func ErrorWithTrace(ctx context.Context, args ...interface{}) {
+	kitLevel.Error(KitLogger).Log("trace_id", instruments.ExtractTraceID(ctx).String(), args)
 }
 
 //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
