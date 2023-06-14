@@ -6,6 +6,7 @@ require (
 	github.com/Vernacular-ai/gorm v1.11.3
 	github.com/aws/aws-sdk-go v1.44.153
 	github.com/getsentry/sentry-go v0.15.0
+	github.com/go-kit/log v0.2.1
 	github.com/google/go-cmp v0.5.9
 	github.com/hashicorp/go-getter v1.6.2
 	github.com/hashicorp/vault/api v1.8.2
@@ -37,6 +38,7 @@ require (
 	github.com/cenkalti/backoff/v4 v4.2.0 // indirect
 	github.com/erikstmartin/go-testdb v0.0.0-20160219214506-8d10e4a1bae5 // indirect
 	github.com/fatih/color v1.13.0 // indirect
+	github.com/go-logfmt/logfmt v0.5.1 // indirect
 	github.com/go-logr/logr v1.2.3 // indirect
 	github.com/go-logr/stdr v1.2.2 // indirect
 	github.com/go-sql-driver/mysql v1.7.0 // indirect
