@@ -25,10 +25,8 @@ type Logger struct {
 }
 
 var (
-	// Legacy logger
 	defaultLogger = Logger{WARN}
-	// Logfmt logger
-	KitLogger = kitLog.NewNopLogger()
+	LogfmtLogger kitLog.Logger
 )
 
 // Prefix based on the log level to be added to every log statement
@@ -181,41 +179,41 @@ func (logger *Logger) Error(err error, args ...interface{}) {
 // Methods to log a message using the default logger without a format
 
 func Trace(args ...interface{}) {
-	if KitLogger != nil {
+	if LogfmtLogger != nil {
 		// When logfmt is enabled, level trace becomes debug
-		kitLevel.Debug(KitLogger).Log(args...)
+		kitLevel.Debug(LogfmtLogger).Log(args...)
 		return
 	}
 	defaultLogger.Trace(args...)
 }
 
 func Debug(args ...interface{}) {
-	if KitLogger != nil {
-		kitLevel.Debug(KitLogger).Log(args...)
+	if LogfmtLogger != nil {
+		kitLevel.Debug(LogfmtLogger).Log(args...)
 		return
 	}
 	defaultLogger.Debug(args...)
 }
 
 func Info(args ...interface{}) {
-	if KitLogger != nil {
-		kitLevel.Info(KitLogger).Log(args...)
+	if LogfmtLogger != nil {
+		kitLevel.Info(LogfmtLogger).Log(args...)
 		return
 	}
 	defaultLogger.Info(args...)
 }
 
 func Warn(args ...interface{}) {
-	if KitLogger != nil {
-		kitLevel.Warn(KitLogger).Log(args...)
+	if LogfmtLogger != nil {
+		kitLevel.Warn(LogfmtLogger).Log(args...)
 		return
 	}
 	defaultLogger.Warn(args...)
 }
 
 func Error(err error, args ...interface{}) {
-	if KitLogger != nil {
-		kitLevel.Error(KitLogger).Log(args...)
+	if LogfmtLogger != nil {
+		kitLevel.Error(LogfmtLogger).Log(args...)
 		return
 	}
 	defaultLogger.Error(err, args...)
@@ -226,41 +224,41 @@ func Error(err error, args ...interface{}) {
 
 // TODO: remove format methods
 func Tracef(format string, args ...interface{}) {
-	if KitLogger != nil {
+	if LogfmtLogger != nil {
 		// When logfmt is enabled, level trace becomes debug
-		kitLevel.Debug(KitLogger).Log(fmt.Sprintf(format, args...))
+		kitLevel.Debug(LogfmtLogger).Log(fmt.Sprintf(format, args...))
 		return
 	}
 	defaultLogger.Tracef(format, args...)
 }
 
 func Debugf(format string, args ...interface{}) {
-	if KitLogger != nil {
-		kitLevel.Debug(KitLogger).Log(fmt.Sprintf(format, args...))
+	if LogfmtLogger != nil {
+		kitLevel.Debug(LogfmtLogger).Log(fmt.Sprintf(format, args...))
 		return
 	}
 	defaultLogger.Debugf(format, args...)
 }
 
 func Infof(format string, args ...interface{}) {
-	if KitLogger != nil {
-		kitLevel.Info(KitLogger).Log(fmt.Sprintf(format, args...))
+	if LogfmtLogger != nil {
+		kitLevel.Info(LogfmtLogger).Log(fmt.Sprintf(format, args...))
 		return
 	}
 	defaultLogger.Infof(format, args...)
 }
 
 func Warnf(format string, args ...interface{}) {
-	if KitLogger != nil {
-		kitLevel.Warn(KitLogger).Log(fmt.Sprintf(format, args...))
+	if LogfmtLogger != nil {
+		kitLevel.Warn(LogfmtLogger).Log(fmt.Sprintf(format, args...))
 		return
 	}
 	defaultLogger.Warnf(format, args...)
 }
 
 func Errorf(err error, format string, args ...interface{}) {
-	if KitLogger != nil {
-		kitLevel.Error(KitLogger).Log(fmt.Sprintf(format, args...))
+	if LogfmtLogger != nil {
+		kitLevel.Error(LogfmtLogger).Log(fmt.Sprintf(format, args...))
 		return
 	}
 	defaultLogger.Errorf(err, format, args...)
@@ -271,22 +269,22 @@ func Errorf(err error, format string, args ...interface{}) {
 
 func DebugWithTrace(ctx context.Context, args ...interface{}) {
 	args = append([]any{"trace_id", instruments.ExtractTraceID(ctx).String()}, args...)
-	kitLevel.Debug(KitLogger).Log(args...)
+	kitLevel.Debug(LogfmtLogger).Log(args...)
 }
 
 func InfoWithTrace(ctx context.Context, args ...interface{}) {
 	args = append([]any{"trace_id", instruments.ExtractTraceID(ctx).String()}, args...)
-	kitLevel.Info(KitLogger).Log(args...)
+	kitLevel.Info(LogfmtLogger).Log(args...)
 }
 
 func WarnWithTrace(ctx context.Context, args ...interface{}) {
 	args = append([]any{"trace_id", instruments.ExtractTraceID(ctx).String()}, args...)
-	kitLevel.Warn(KitLogger).Log(args...)
+	kitLevel.Warn(LogfmtLogger).Log(args...)
 }
 
 func ErrorWithTrace(ctx context.Context, args ...interface{}) {
 	args = append([]any{"trace_id", instruments.ExtractTraceID(ctx).String()}, args...)
-	kitLevel.Error(KitLogger).Log(args...)
+	kitLevel.Error(LogfmtLogger).Log(args...)
 }
 
 //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////

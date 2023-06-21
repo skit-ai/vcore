@@ -8,14 +8,13 @@ import (
 	"github.com/go-kit/log/level"
 )
 
-// InitLogfmtLogger initialises the global gokit logger and overrides the
-// default logger for the server.
+// InitLogfmtLogger initialises a logfmt logger from go-kit
 func InitLogfmtLogger() {
 	logger := log.NewLogfmtLogger(log.NewSyncWriter(os.Stderr))
 	// Using legacy logger's level for level filtering
 	logger = level.NewFilter(logger, LevelFilter(defaultLogger.level))
 	logger = log.With(logger, "ts", log.DefaultTimestampUTC)
-	KitLogger = log.With(logger, "caller", log.Caller(4))
+	LogfmtLogger = log.With(logger, "caller", log.Caller(4))
 }
 
 // CheckFatal prints an error and exits with error code 1 if err is non-nil.
@@ -24,7 +23,7 @@ func CheckFatal(location string, err error) {
 		return
 	}
 
-	logger := level.Error(KitLogger)
+	logger := level.Error(LogfmtLogger)
 	if location != "" {
 		logger = log.With(logger, "msg", "error "+location)
 	}
