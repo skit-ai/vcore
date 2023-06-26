@@ -6,8 +6,8 @@ import (
 	"log"
 	"strings"
 
-	kitLog "github.com/go-kit/log"
 	kitLevel "github.com/go-kit/log/level"
+	"github.com/skit-ai/vcore/env"
 	"github.com/skit-ai/vcore/errors"
 	"github.com/skit-ai/vcore/instruments"
 )
@@ -24,10 +24,37 @@ type Logger struct {
 	level int
 }
 
+type logWrap interface {
+	Debug(args ...interface{})
+	Info(args ...interface{})
+	Warn(args ...interface{})
+	Error(err error, args ...interface{})
+
+	Debugf(format string, args ...interface{})
+	Infof(format string, args ...interface{})
+	Warnf(format string, args ...interface{})
+	Errorf(err error, format string, args ...interface{})
+}
+
 var (
 	defaultLogger = Logger{WARN}
-	LogfmtLogger kitLog.Logger
+	logfmtLogger = logfmtWrapper{}
+	selectLogger logWrap
 )
+
+func init() {
+	level := env.Int("LOG_LEVEL", 0)
+	defaultLogger.SetLevel(level)
+
+	format := env.String("LOG_FORMAT", "")
+	switch format {
+	case "logfmt":
+		initLogfmt()
+		selectLogger = &logfmtLogger
+	default:
+		selectLogger = &defaultLogger
+	}
+}
 
 // Prefix based on the log level to be added to every log statement
 func levelPrefix(level int) string {
@@ -179,44 +206,29 @@ func (logger *Logger) Error(err error, args ...interface{}) {
 // Methods to log a message using the default logger without a format
 
 func Trace(args ...interface{}) {
-	if LogfmtLogger != nil {
+	//TODO; verify this
+	if logfmtLogger.logger != nil {
 		// When logfmt is enabled, level trace becomes debug
-		kitLevel.Debug(LogfmtLogger).Log(args...)
+		kitLevel.Debug(*logfmtLogger.logger).Log(args...)
 		return
 	}
 	defaultLogger.Trace(args...)
 }
 
 func Debug(args ...interface{}) {
-	if LogfmtLogger != nil {
-		kitLevel.Debug(LogfmtLogger).Log(args...)
-		return
-	}
-	defaultLogger.Debug(args...)
+	selectLogger.Debug(args...)
 }
 
 func Info(args ...interface{}) {
-	if LogfmtLogger != nil {
-		kitLevel.Info(LogfmtLogger).Log(args...)
-		return
-	}
-	defaultLogger.Info(args...)
+	selectLogger.Info(args...)
 }
 
 func Warn(args ...interface{}) {
-	if LogfmtLogger != nil {
-		kitLevel.Warn(LogfmtLogger).Log(args...)
-		return
-	}
-	defaultLogger.Warn(args...)
+	selectLogger.Warn(args...)
 }
 
 func Error(err error, args ...interface{}) {
-	if LogfmtLogger != nil {
-		kitLevel.Error(LogfmtLogger).Log(args...)
-		return
-	}
-	defaultLogger.Error(err, args...)
+	selectLogger.Error(err, args...)
 }
 
 //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -224,44 +236,29 @@ func Error(err error, args ...interface{}) {
 
 // TODO: remove format methods
 func Tracef(format string, args ...interface{}) {
-	if LogfmtLogger != nil {
+	//TODO: verify this as well
+	if logfmtLogger.logger != nil{
 		// When logfmt is enabled, level trace becomes debug
-		kitLevel.Debug(LogfmtLogger).Log(fmt.Sprintf(format, args...))
+		kitLevel.Debug(*logfmtLogger.logger).Log(fmt.Sprintf(format, args...))
 		return
 	}
 	defaultLogger.Tracef(format, args...)
 }
 
 func Debugf(format string, args ...interface{}) {
-	if LogfmtLogger != nil {
-		kitLevel.Debug(LogfmtLogger).Log(fmt.Sprintf(format, args...))
-		return
-	}
-	defaultLogger.Debugf(format, args...)
+	selectLogger.Debugf(format, args...)
 }
 
 func Infof(format string, args ...interface{}) {
-	if LogfmtLogger != nil {
-		kitLevel.Info(LogfmtLogger).Log(fmt.Sprintf(format, args...))
-		return
-	}
-	defaultLogger.Infof(format, args...)
+	selectLogger.Infof(format, args...)
 }
 
 func Warnf(format string, args ...interface{}) {
-	if LogfmtLogger != nil {
-		kitLevel.Warn(LogfmtLogger).Log(fmt.Sprintf(format, args...))
-		return
-	}
-	defaultLogger.Warnf(format, args...)
+	selectLogger.Warnf(format, args...)
 }
 
 func Errorf(err error, format string, args ...interface{}) {
-	if LogfmtLogger != nil {
-		kitLevel.Error(LogfmtLogger).Log(fmt.Sprintf(format, args...))
-		return
-	}
-	defaultLogger.Errorf(err, format, args...)
+	selectLogger.Errorf(err, format, args...)
 }
 
 //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -269,22 +266,22 @@ func Errorf(err error, format string, args ...interface{}) {
 
 func DebugWithTrace(ctx context.Context, args ...interface{}) {
 	args = append([]any{"trace_id", instruments.ExtractTraceID(ctx).String()}, args...)
-	kitLevel.Debug(LogfmtLogger).Log(args...)
+	kitLevel.Debug(*logfmtLogger.logger).Log(args...)
 }
 
 func InfoWithTrace(ctx context.Context, args ...interface{}) {
 	args = append([]any{"trace_id", instruments.ExtractTraceID(ctx).String()}, args...)
-	kitLevel.Info(LogfmtLogger).Log(args...)
+	kitLevel.Info(*logfmtLogger.logger).Log(args...)
 }
 
 func WarnWithTrace(ctx context.Context, args ...interface{}) {
 	args = append([]any{"trace_id", instruments.ExtractTraceID(ctx).String()}, args...)
-	kitLevel.Warn(LogfmtLogger).Log(args...)
+	kitLevel.Warn(*logfmtLogger.logger).Log(args...)
 }
 
 func ErrorWithTrace(ctx context.Context, args ...interface{}) {
 	args = append([]any{"trace_id", instruments.ExtractTraceID(ctx).String()}, args...)
-	kitLevel.Error(LogfmtLogger).Log(args...)
+	kitLevel.Error(*logfmtLogger.logger).Log(args...)
 }
 
 //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
