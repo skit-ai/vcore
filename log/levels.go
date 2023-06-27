@@ -1,15 +1,11 @@
 package log
 
 import (
-	"context"
 	"fmt"
 	"log"
 	"strings"
 
-	kitLevel "github.com/go-kit/log/level"
-	"github.com/skit-ai/vcore/env"
 	"github.com/skit-ai/vcore/errors"
-	"github.com/skit-ai/vcore/instruments"
 )
 
 const (
@@ -24,37 +20,7 @@ type Logger struct {
 	level int
 }
 
-type logWrap interface {
-	Debug(args ...interface{})
-	Info(args ...interface{})
-	Warn(args ...interface{})
-	Error(err error, args ...interface{})
-
-	Debugf(format string, args ...interface{})
-	Infof(format string, args ...interface{})
-	Warnf(format string, args ...interface{})
-	Errorf(err error, format string, args ...interface{})
-}
-
-var (
-	defaultLogger = Logger{WARN}
-	logfmtLogger = logfmtWrapper{}
-	selectLogger logWrap
-)
-
-func init() {
-	level := env.Int("LOG_LEVEL", 0)
-	defaultLogger.SetLevel(level)
-
-	format := env.String("LOG_FORMAT", "")
-	switch format {
-	case "logfmt":
-		initLogfmt()
-		selectLogger = &logfmtLogger
-	default:
-		selectLogger = &defaultLogger
-	}
-}
+var defaultLogger = Logger{WARN}
 
 // Prefix based on the log level to be added to every log statement
 func levelPrefix(level int) string {
@@ -206,82 +172,46 @@ func (logger *Logger) Error(err error, args ...interface{}) {
 // Methods to log a message using the default logger without a format
 
 func Trace(args ...interface{}) {
-	//TODO; verify this
-	if logfmtLogger.logger != nil {
-		// When logfmt is enabled, level trace becomes debug
-		kitLevel.Debug(*logfmtLogger.logger).Log(args...)
-		return
-	}
 	defaultLogger.Trace(args...)
 }
 
 func Debug(args ...interface{}) {
-	selectLogger.Debug(args...)
+	defaultLogger.Debug(args...)
 }
 
 func Info(args ...interface{}) {
-	selectLogger.Info(args...)
+	defaultLogger.Info(args...)
 }
 
 func Warn(args ...interface{}) {
-	selectLogger.Warn(args...)
+	defaultLogger.Warn(args...)
 }
 
 func Error(err error, args ...interface{}) {
-	selectLogger.Error(err, args...)
+	defaultLogger.Error(err, args...)
 }
 
 //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 // Methods to log messages using the default logger with a format
 
-// TODO: remove format methods
 func Tracef(format string, args ...interface{}) {
-	//TODO: verify this as well
-	if logfmtLogger.logger != nil{
-		// When logfmt is enabled, level trace becomes debug
-		kitLevel.Debug(*logfmtLogger.logger).Log(fmt.Sprintf(format, args...))
-		return
-	}
 	defaultLogger.Tracef(format, args...)
 }
 
 func Debugf(format string, args ...interface{}) {
-	selectLogger.Debugf(format, args...)
+	defaultLogger.Debugf(format, args...)
 }
 
 func Infof(format string, args ...interface{}) {
-	selectLogger.Infof(format, args...)
+	defaultLogger.Infof(format, args...)
 }
 
 func Warnf(format string, args ...interface{}) {
-	selectLogger.Warnf(format, args...)
+	defaultLogger.Warnf(format, args...)
 }
 
 func Errorf(err error, format string, args ...interface{}) {
-	selectLogger.Errorf(err, format, args...)
-}
-
-//////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-// Methods to log messages using the logfomt logger with a trace_id
-
-func DebugWithTrace(ctx context.Context, args ...interface{}) {
-	args = append([]any{"trace_id", instruments.ExtractTraceID(ctx).String()}, args...)
-	kitLevel.Debug(*logfmtLogger.logger).Log(args...)
-}
-
-func InfoWithTrace(ctx context.Context, args ...interface{}) {
-	args = append([]any{"trace_id", instruments.ExtractTraceID(ctx).String()}, args...)
-	kitLevel.Info(*logfmtLogger.logger).Log(args...)
-}
-
-func WarnWithTrace(ctx context.Context, args ...interface{}) {
-	args = append([]any{"trace_id", instruments.ExtractTraceID(ctx).String()}, args...)
-	kitLevel.Warn(*logfmtLogger.logger).Log(args...)
-}
-
-func ErrorWithTrace(ctx context.Context, args ...interface{}) {
-	args = append([]any{"trace_id", instruments.ExtractTraceID(ctx).String()}, args...)
-	kitLevel.Error(*logfmtLogger.logger).Log(args...)
+	defaultLogger.Errorf(err, format, args...)
 }
 
 //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
