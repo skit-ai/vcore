@@ -15,6 +15,8 @@ type loggerWrapper struct {
     logger log.Logger
 }
 
+const defaultMsgKey = "msg"
+const defaultErrKey = "error"
 var defaultLoggerWrapper *loggerWrapper
 
 func init() {
@@ -31,116 +33,6 @@ func newloggerWrapper(logLevel string) *loggerWrapper {
 	return &loggerWrapper{
 		logger: logger,
 	}
-}
-
-func (l *loggerWrapper) Info(msg string, args ...any) {
-    level.Info(log.With(l.logger, "msg", msg)).Log(args...)
-}
-
-func (l *loggerWrapper) Warn(msg string, args ...any) {
-    level.Warn(log.With(l.logger, "msg", msg)).Log(args...)
-}
-
-func (l *loggerWrapper) Debug(msg string, args ...any) {
-    level.Debug(log.With(defaultLoggerWrapper.logger, "msg", msg)).Log(args...)
-}
-
-func (l *loggerWrapper) Error(err error, msg string, args ...any) {
-	if err == nil {
-		level.Error(log.With(l.logger, "msg", msg)).Log(args...)
-		return
-	}
-
-	if msg == "" {
-		level.Error(log.With(l.logger, "err", err)).Log(args...)
-		return
-	}
-
-    level.Error(log.With(l.logger, "msg", msg, "err", err)).Log(args...)
-}
-
-func (l *loggerWrapper) Infof(format string, args ...any) {
-    level.Info(l.logger).Log("msg", fmt.Sprintf(format, args...))
-}
-
-func (l *loggerWrapper) Warnf(format string, args ...any) {
-    level.Warn(l.logger).Log("msg", fmt.Sprintf(format, args...))
-}
-
-func (l *loggerWrapper) Debugf(format string, args ...any) {
-    level.Debug(l.logger).Log("msg", fmt.Sprintf(format, args...))
-}
-
-func (l *loggerWrapper) Errorf(err error, format string, args ...any) {
-    level.Error(l.logger).Log("err", err.Error(), "msg", fmt.Sprintf(format, args...))
-}
-
-func (l *loggerWrapper) WithTraceId(ctx context.Context) *loggerWrapper {
-    traceId := instruments.ExtractTraceID(ctx)
-    logger := log.With(l.logger, "trace_id", traceId)
-
-	return &loggerWrapper{
-		logger: logger,
-	}
-}
-
-func (l *loggerWrapper) WithFields(fields map[string]any) *loggerWrapper {
-    fieldArgs := mapToSlice(fields)
-    logger := log.With(l.logger, fieldArgs...)
-
-	return &loggerWrapper{
-		logger: logger,
-	}
-}
-
-func Info(msg string, args ...any) {
-    level.Info(log.With(defaultLoggerWrapper.logger, "msg", msg)).Log(args...)
-}
-
-func Warn(msg string, args ...any) {
-    level.Warn(log.With(defaultLoggerWrapper.logger, "msg", msg)).Log(args...)
-}
-
-func Debug(msg string, args ...any) {
-    level.Debug(log.With(defaultLoggerWrapper.logger, "msg", msg)).Log(args...)
-}
-
-func Error(err error, msg string, args ...any) {
-	if err == nil {
-		level.Error(log.With(defaultLoggerWrapper.logger, "msg", msg)).Log(args...)
-		return
-	}
-
-	if msg == "" {
-		level.Error(log.With(defaultLoggerWrapper.logger, "err", err)).Log(args...)
-		return
-	}
-
-    level.Error(log.With(defaultLoggerWrapper.logger, "msg", msg, "err", err)).Log(args...)
-}
-
-func Infof(format string, args ...any) {
-    level.Info(defaultLoggerWrapper.logger).Log("msg", fmt.Sprintf(format, args...))
-}
-
-func Warnf(format string, args ...any) {
-    level.Warn(defaultLoggerWrapper.logger).Log("msg", fmt.Sprintf(format, args...))
-}
-
-func Debugf(format string, args ...any) {
-    level.Debug(defaultLoggerWrapper.logger).Log("msg", fmt.Sprintf(format, args...))
-}
-
-func Errorf(err error, format string, args ...any) {
-    level.Error(defaultLoggerWrapper.logger).Log("err", err.Error(), "msg", fmt.Sprintf(format, args...))
-}
-
-func WithFields(fields map[string]any) *loggerWrapper {
-	return defaultLoggerWrapper.WithFields(fields)
-}
-
-func WithTraceId(ctx context.Context) *loggerWrapper {
-	return defaultLoggerWrapper.WithTraceId(ctx)
 }
 
 func levelFilter(logLevel string) level.Option {
@@ -167,6 +59,162 @@ func mapToSlice(m map[string]any) []any {
     return args
 }
 
+
+// Info logs a line with level info using the loggerWrapper instance.
+func (l *loggerWrapper) Info(msg string, args ...any) {
+    level.Info(log.With(l.logger, defaultMsgKey, msg)).Log(args...)
+}
+
+// Warn logs a line with level warn using the loggerWrapper instance.
+func (l *loggerWrapper) Warn(msg string, args ...any) {
+    level.Warn(log.With(l.logger, defaultMsgKey, msg)).Log(args...)
+}
+
+// Debug logs a line with level debug using a loggerWrapper instance.
+func (l *loggerWrapper) Debug(msg string, args ...any) {
+    level.Debug(log.With(defaultLoggerWrapper.logger, defaultMsgKey, msg)).Log(args...)
+}
+
+// Error logs a line with level error using a loggerWrapper instance.
+// If err is not nil it adds only the msg string or vice-versa. Otherwise adds both.
+func (l *loggerWrapper) Error(err error, msg string, args ...any) {
+	if err == nil {
+		level.Error(log.With(l.logger, defaultMsgKey, msg)).Log(args...)
+		return
+	}
+
+	if msg == "" {
+		level.Error(log.With(l.logger, defaultErrKey, err.Error())).Log(args...)
+		return
+	}
+
+    level.Error(log.With(l.logger, defaultMsgKey, msg, defaultErrKey, err.Error())).Log(args...)
+}
+
+// Infof logs a format line with level info using the loggerWrapper instance.
+func (l *loggerWrapper) Infof(format string, args ...any) {
+    level.Info(l.logger).Log(defaultMsgKey, fmt.Sprintf(format, args...))
+}
+
+// Warnf logs a format line with level warn using the loggerWrapper instance.
+func (l *loggerWrapper) Warnf(format string, args ...any) {
+    level.Warn(l.logger).Log(defaultMsgKey, fmt.Sprintf(format, args...))
+}
+
+// Debugf logs a format line with level debug using the loggerWrapper instance.
+func (l *loggerWrapper) Debugf(format string, args ...any) {
+    level.Debug(l.logger).Log(defaultMsgKey, fmt.Sprintf(format, args...))
+}
+
+// Errorf logs a format line with level error using a loggerWrapper instance.
+// If err is not nil it adds only the msg string or vice-versa. Otherwise adds both.
+func (l *loggerWrapper) Errorf(err error, format string, args ...any) {
+	if err == nil {
+		level.Error(l.logger).Log(defaultMsgKey, fmt.Sprintf(format, args...))
+		return
+	}
+
+	if format == "" {
+		level.Error(l.logger).Log(defaultErrKey, err.Error())
+		return
+	}
+
+    level.Error(l.logger).Log(defaultMsgKey, fmt.Sprintf(format, args...), defaultErrKey, err.Error())
+}
+
+// WithTraceId returns a pointer to updated loggerWrapper with trace_id attached to the logger.
+func (l *loggerWrapper) WithTraceId(ctx context.Context) *loggerWrapper {
+    traceId := instruments.ExtractTraceID(ctx)
+    logger := log.With(l.logger, "trace_id", traceId)
+
+	return &loggerWrapper{
+		logger: logger,
+	}
+}
+
+// WithFields returns a pointer to updated loggerWrapper with custom fields attached to the logger.
+func (l *loggerWrapper) WithFields(fields map[string]any) *loggerWrapper {
+    fieldArgs := mapToSlice(fields)
+    logger := log.With(l.logger, fieldArgs...)
+
+	return &loggerWrapper{
+		logger: logger,
+	}
+}
+
+// Info logs a line with level Info.
+func Info(msg string, args ...any) {
+    level.Info(log.With(defaultLoggerWrapper.logger, defaultMsgKey, msg)).Log(args...)
+}
+
+// Warn logs a line with level warn.
+func Warn(msg string, args ...any) {
+    level.Warn(log.With(defaultLoggerWrapper.logger, defaultMsgKey, msg)).Log(args...)
+}
+
+// Debug logs a line with level debug.
+func Debug(msg string, args ...any) {
+    level.Debug(log.With(defaultLoggerWrapper.logger, defaultMsgKey, msg)).Log(args...)
+}
+
+// Error logs a line with level error.
+// If err is not nil it adds only the msg string or vice-versa. Otherwise adds both.
+func Error(err error, msg string, args ...any) {
+	if err == nil {
+		level.Error(log.With(defaultLoggerWrapper.logger, defaultMsgKey, msg)).Log(args...)
+		return
+	}
+
+	if msg == "" {
+		level.Error(log.With(defaultLoggerWrapper.logger, defaultErrKey, err.Error())).Log(args...)
+		return
+	}
+
+    level.Error(log.With(defaultLoggerWrapper.logger, defaultMsgKey, msg, defaultErrKey, err.Error())).Log(args...)
+}
+
+// Infof logs a format line with level info.
+func Infof(format string, args ...any) {
+    level.Info(defaultLoggerWrapper.logger).Log(defaultMsgKey, fmt.Sprintf(format, args...))
+}
+
+// Warnf logs a format line with level warn.
+func Warnf(format string, args ...any) {
+    level.Warn(defaultLoggerWrapper.logger).Log(defaultMsgKey, fmt.Sprintf(format, args...))
+}
+
+// Debugf logs a format line with level debug.
+func Debugf(format string, args ...any) {
+    level.Debug(defaultLoggerWrapper.logger).Log(defaultMsgKey, fmt.Sprintf(format, args...))
+}
+
+// Errorf logs a format line with level error.
+// If err is not nil it adds only the msg string or vice-versa. Otherwise adds both.
+func Errorf(err error, format string, args ...any) {
+	if err == nil {
+		level.Error(defaultLoggerWrapper.logger).Log(defaultMsgKey, fmt.Sprintf(format, args...))
+		return
+	}
+
+	if format == "" {
+		level.Error(defaultLoggerWrapper.logger).Log(defaultErrKey, err.Error())
+		return
+	}
+
+    level.Error(defaultLoggerWrapper.logger).Log(defaultMsgKey, fmt.Sprintf(format, args...), defaultErrKey, err.Error())
+}
+
+// WithFields returns WithFields using the defaultLoggerWrapper.
+func WithFields(fields map[string]any) *loggerWrapper {
+	return defaultLoggerWrapper.WithFields(fields)
+}
+
+// WithTraceId returns WithTraceId using the defaultLoggerWrapper.
+func WithTraceId(ctx context.Context) *loggerWrapper {
+	return defaultLoggerWrapper.WithTraceId(ctx)
+}
+
+// GetLogger returns the default instance of logfmt logger
 func GetLogger() log.Logger {
 	return defaultLoggerWrapper.logger
 }
