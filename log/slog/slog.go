@@ -222,7 +222,7 @@ func WithTraceId(ctx context.Context) Logger {
 	return defaultLoggerWrapper.WithTraceId(ctx)
 }
 
-// GetLogger returns the default instance of logfmt logger
-func GetLogger() log.Logger {
+// DefaultLogger returns the default instance of logfmt logger
+func DefaultLogger() log.Logger {
 	return defaultLoggerWrapper.logger
 }
