@@ -18,16 +18,19 @@ type loggerWrapper struct {
 const defaultMsgKey = "msg"
 const defaultErrKey = "error"
 
-var defaultLoggerWrapper *loggerWrapper
+var (
+	defaultLoggerWrapper *loggerWrapper
+	logLevel             string
+)
 
 func init() {
-	logLevel := env.String("LOG_LEVEL", "info")
+	logLevel = env.String("LOG_LEVEL", "info")
 	defaultLoggerWrapper = newloggerWrapper(logLevel)
 }
 
 // NewLogger returns a new instance of Logger.
 func NewLogger() Logger {
-	return defaultLoggerWrapper
+	return newloggerWrapper(logLevel)
 }
 
 func newloggerWrapper(logLevel string) *loggerWrapper {
