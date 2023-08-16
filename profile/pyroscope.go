@@ -35,9 +35,9 @@ func InitPyroscope() error {
 	return nil
 }
 
-// InitPyroScopeWithProfiles initialises profiling wit specified ProfileTypes.
+// InitPyroscopeWithProfiles initialises profiling wit specified ProfileTypes.
 // List of profiles can be found here: https://github.com/grafana/pyroscope-golang/blob/main/pyroscope/types.go
-func InitPyroScopeWithProfiles(profileTypes []pyroscope.ProfileType) error {
+func InitPyroscopeWithProfiles(profileTypes []pyroscope.ProfileType) error {
 	if host == "" {
 		return errNoHost
 	}
