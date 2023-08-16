@@ -21,10 +21,12 @@ const defaultErrKey = "error"
 var (
 	defaultLoggerWrapper *loggerWrapper
 	logLevel             string
+	callerDepth          int
 )
 
 func init() {
 	logLevel = env.String("LOG_LEVEL", "info")
+	callerDepth = env.Int("LOG_CALLER_DEPTH", 4)
 	defaultLoggerWrapper = newloggerWrapper(logLevel)
 }
 
@@ -37,7 +39,7 @@ func newloggerWrapper(logLevel string) *loggerWrapper {
 	logger := log.NewLogfmtLogger(log.NewSyncWriter(os.Stderr))
 	logger = level.NewFilter(logger, levelFilter(logLevel))
 	logger = log.With(logger, "ts", log.DefaultTimestamp)
-	logger = log.With(logger, "caller", log.Caller(4))
+	logger = log.With(logger, "caller", log.Caller(callerDepth))
 
 	return &loggerWrapper{
 		logger: logger,
