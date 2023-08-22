@@ -50,7 +50,7 @@ slogger.Info("the quick brown")
 4. Create a logger with custom fields attached
 ```
 logFields := map[string]interface{}{
-		"integration_uuid": response.IntegrationUuid,
+	"integration_uuid": response.IntegrationUuid,
 }
 slogger := slog.WithFields(logFields)
 slogger.Warn("fox jumps over")
@@ -59,7 +59,7 @@ slogger.Warn("fox jumps over")
 5. Create a logger with trace_id and custom fields attached
 ```
 logFields := map[string]interface{}{
-		"integration_uuid": response.IntegrationUuid,
+	"integration_uuid": response.IntegrationUuid,
 }
 slogger := slog.WithFields(logFields).WithTraceId(ctx)
 slogger.Debug("the lazy dog")
