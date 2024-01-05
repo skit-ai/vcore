@@ -26,6 +26,7 @@ const (
 		"(([-a-z0-9]+)\\.)?" + // region name, optional for us-east-1
 		"vpce\\." +
 		"(amazonaws\\.com|c2s\\.ic\\.gov|sc2s\\.sgov\\.gov)"
+	vpceUrlPatternHostIdx   = 0
 	vpceUrlPatternBucketIdx = 2
 	vpceUrlPatternRegionIdx = 5
 
@@ -46,6 +47,7 @@ var (
 // S3URL holds interesting pieces after parsing a s3 URL
 type S3URL struct {
 	IsPathStyle bool
+	EndPoint    string
 	Bucket      string
 	Key         string
 	Region      string
@@ -54,7 +56,8 @@ type S3URL struct {
 // DownloadFile downloads a file from s3 based on the key and writes it into WriteAt.
 func (u S3URL) DownloadFile(ctx context.Context, w io.WriterAt) error {
 	sess, err := session.NewSession(&aws.Config{
-		Region: aws.String(u.Region), // Specify the region where the bucket is located
+		Region:   aws.String(u.Region), // Specify the region where the bucket is located
+		Endpoint: aws.String(u.EndPoint),
 	})
 	if err != nil {
 		return errors.NewError("Error creating session", err, false)
@@ -89,12 +92,9 @@ func (u S3URL) DownloadFile(ctx context.Context, w io.WriterAt) error {
 //
 //	https://s3.us-east-1.amazonaws.com/mybucket/a/b/c
 func ParseAmazonS3URL(s3URL *url.URL) (S3URL, error) {
-	output, err := parseBucketAndRegionFromHost(s3URL.Host, vpceUrlRegex, vpceUrlPatternBucketIdx, vpceUrlPatternRegionIdx)
+	output, err := parseBucketAndRegionFromHost(s3URL.Host)
 	if err != nil {
-		output, err = parseBucketAndRegionFromHost(s3URL.Host, nonVpceUrlRegex, nonVpceUrlPatternBucketIdx, nonVpceUrlPatternRegionIdx)
-		if err != nil {
-			return S3URL{}, err
-		}
+		return S3URL{}, errors.NewError("parsing host failed", err, false)
 	}
 
 	output.IsPathStyle = output.Bucket == ""
@@ -143,15 +143,24 @@ func ParseAmazonS3URL(s3URL *url.URL) (S3URL, error) {
 	return output, nil
 }
 
-func parseBucketAndRegionFromHost(host string, re *regexp.Regexp, bucketIdx, regionIdx int) (S3URL, error) {
-	result := re.FindStringSubmatch(host)
-	if result != nil && len(result) > bucketIdx && len(result) > regionIdx {
+func parseBucketAndRegionFromHost(host string) (S3URL, error) {
+	result := vpceUrlRegex.FindStringSubmatch(host)
+	if result != nil && len(result) > vpceUrlPatternBucketIdx && len(result) > vpceUrlPatternRegionIdx {
 		return S3URL{
-			Bucket: result[bucketIdx],
-			Region: result[regionIdx],
+			EndPoint: result[vpceUrlPatternHostIdx],
+			Bucket:   result[vpceUrlPatternBucketIdx],
+			Region:   result[vpceUrlPatternRegionIdx],
 		}, nil
 	} else {
-		return S3URL{}, errors.NewError("no match", nil, false)
+		result = nonVpceUrlRegex.FindStringSubmatch(host)
+		if result != nil && len(result) > vpceUrlPatternBucketIdx && len(result) > vpceUrlPatternRegionIdx {
+			return S3URL{
+				Bucket: result[nonVpceUrlPatternBucketIdx],
+				Region: result[nonVpceUrlPatternRegionIdx],
+			}, nil
+		} else {
+			return S3URL{}, errors.NewError("failed to match URL", nil, false)
+		}
 	}
 }
 
