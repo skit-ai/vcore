@@ -20,28 +20,28 @@ import (
 
 const (
 	// Regex for S3 URLs, VPCE interface endpoint
-	vpceUrlPattern = "^((.+)\\.)?" + // maybe a bucket name
+	vpceURLPattern = "^((.+)\\.)?" + // maybe a bucket name
 		"(bucket|accesspoint|control)\\.vpce-[-a-z0-9]+\\." + // VPC endpoint DNS name
 		"s3[.-]" + // S3 service name
 		"(([-a-z0-9]+)\\.)?" + // region name, optional for us-east-1
 		"vpce\\." +
 		"(amazonaws\\.com|c2s\\.ic\\.gov|sc2s\\.sgov\\.gov)"
-	vpceUrlPatternHostIdx   = 0
-	vpceUrlPatternBucketIdx = 2
-	vpceUrlPatternRegionIdx = 5
+	vpceURLPatternHostIdx   = 0
+	vpceURLPatternBucketIdx = 2
+	vpceURLPatternRegionIdx = 5
 
 	// Regex for S3 URLs, public S3 endpoint
-	nonVpceUrlPattern = "^((.+)\\.)?" + // maybe a bucket name
+	nonVpceURLPattern = "^((.+)\\.)?" + // maybe a bucket name
 		"s3[.-](website[-.])?(accelerate\\.)?(dualstack[-.])?" + // S3 service name with optional features
 		"(([-a-z0-9]+)\\.)?" + // region name, optional for us-east-1
 		"(amazonaws\\.com|c2s\\.ic\\.gov|sc2s\\.sgov\\.gov)"
-	nonVpceUrlPatternBucketIdx = 2
-	nonVpceUrlPatternRegionIdx = 7
+	nonVpceURLPatternBucketIdx = 2
+	nonVpceURLPatternRegionIdx = 7
 )
 
 var (
-	vpceUrlRegex    = regexp.MustCompile(vpceUrlPattern)
-	nonVpceUrlRegex = regexp.MustCompile(nonVpceUrlPattern)
+	vpceUrlRegex    = regexp.MustCompile(vpceURLPattern)
+	nonVpceUrlRegex = regexp.MustCompile(nonVpceURLPattern)
 )
 
 // S3URL holds interesting pieces after parsing a s3 URL
@@ -145,18 +145,18 @@ func ParseAmazonS3URL(s3URL *url.URL) (S3URL, error) {
 
 func parseBucketAndRegionFromHost(host string) (S3URL, error) {
 	result := vpceUrlRegex.FindStringSubmatch(host)
-	if result != nil && len(result) > vpceUrlPatternBucketIdx && len(result) > vpceUrlPatternRegionIdx {
+	if result != nil && len(result) > vpceURLPatternBucketIdx && len(result) > vpceURLPatternRegionIdx {
 		return S3URL{
-			EndPoint: result[vpceUrlPatternHostIdx],
-			Bucket:   result[vpceUrlPatternBucketIdx],
-			Region:   result[vpceUrlPatternRegionIdx],
+			EndPoint: result[vpceURLPatternHostIdx],
+			Bucket:   result[vpceURLPatternBucketIdx],
+			Region:   result[vpceURLPatternRegionIdx],
 		}, nil
 	} else {
 		result = nonVpceUrlRegex.FindStringSubmatch(host)
-		if result != nil && len(result) > vpceUrlPatternBucketIdx && len(result) > vpceUrlPatternRegionIdx {
+		if result != nil && len(result) > vpceURLPatternBucketIdx && len(result) > vpceURLPatternRegionIdx {
 			return S3URL{
-				Bucket: result[nonVpceUrlPatternBucketIdx],
-				Region: result[nonVpceUrlPatternRegionIdx],
+				Bucket: result[nonVpceURLPatternBucketIdx],
+				Region: result[nonVpceURLPatternRegionIdx],
 			}, nil
 		} else {
 			return S3URL{}, errors.NewError("failed to match URL", nil, false)
