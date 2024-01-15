@@ -169,13 +169,13 @@ func parseBucketAndRegionFromHost(host string) (S3URL, error) {
 func DownloadFileFromS3(ctx context.Context, downloadURL, filePath string) error {
 	parsedURL, err := url.Parse(downloadURL)
 	if err != nil {
-		return err
+		return errors.NewError("Failed to parse URL", err, false)
 	}
 
 	// Parse s3 URL to extract region, key and bucket.
 	s3URL, err := ParseAmazonS3URL(parsedURL)
 	if err != nil {
-		return errors.NewError("Failed to parse URL", err, false)
+		return errors.NewError("Failed to parse URL as s3 URL", err, false)
 	}
 
 	// Create file path
