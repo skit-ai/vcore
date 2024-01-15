@@ -20,6 +20,7 @@ import (
 
 const (
 	// Regex for S3 URLs, VPCE interface endpoint
+	// Source - https://github.com/aws/amazon-ssm-agent/blob/mainline/agent/s3util/s3uri.go
 	vpceURLPattern = "^((.+)\\.)?" + // maybe a bucket name
 		"(bucket|accesspoint|control)\\.vpce-[-a-z0-9]+\\." + // VPC endpoint DNS name
 		"s3[.-]" + // S3 service name
