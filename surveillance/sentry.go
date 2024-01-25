@@ -2,19 +2,17 @@ package surveillance
 
 import (
 	"context"
-	"net/http"
-	"os"
-	"strconv"
-
 	"github.com/getsentry/sentry-go"
 	sentryhttp "github.com/getsentry/sentry-go/http"
 	"github.com/julienschmidt/httprouter"
+	"github.com/skit-ai/vcore/env"
 	"github.com/skit-ai/vcore/errors"
 	"github.com/skit-ai/vcore/log"
 	sentryWrapper "github.com/skit-ai/vcore/sentry"
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/codes"
 	"google.golang.org/grpc/status"
+	"net/http"
 )
 
 type Sentry struct {
@@ -23,12 +21,11 @@ type Sentry struct {
 }
 
 func InitSentry(release string) (client *Sentry) {
-	dsn := os.Getenv("SENTRY_DSN")
-
-	sampleRate, _ := strconv.ParseFloat(os.Getenv("SENTRY_SAMPLING"), 64)
+	dsn := env.String("SENTRY_DSN", "")
+	sampleRate := env.Float("SENTRY_SAMPLING", 0.0)
 
 	if release == "" {
-		release = os.Getenv("SENTRY_RELEASE")
+		release = env.String("SENTRY_RELEASE", "")
 	}
 	if dsn != "" {
 		if err := sentry.Init(sentry.ClientOptions{
@@ -42,7 +39,7 @@ func InitSentry(release string) (client *Sentry) {
 			Release:    release,
 			SampleRate: sampleRate,
 
-			Environment: os.Getenv("ENVIRONMENT"),
+			Environment: env.String("ENVIRONMENT", ""),
 		}); err != nil {
 			log.Warnf("Could not initialize sentry with DSN: %s", dsn)
 			client = &Sentry{nil, nil}

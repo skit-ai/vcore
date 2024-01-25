@@ -19,14 +19,15 @@ import (
 	"strings"
 	"time"
 
-	"github.com/getsentry/sentry-go"
+	"github.com/skit-ai/vcore/env"
 	"github.com/skit-ai/vcore/errors"
 	"github.com/skit-ai/vcore/surveillance"
 
+	"github.com/getsentry/sentry-go"
 	"github.com/google/go-cmp/cmp"
 )
 
-var DevMode = strings.ToUpper(os.Getenv("ENVIRONMENT")) == "DEV"
+var DevMode = strings.ToUpper(env.String("ENVIRONMENT", "")) == "DEV"
 
 var link = regexp.MustCompile("(^[A-Za-z])|_([A-Za-z])")
 
