@@ -1,8 +1,8 @@
 package profile
 
 import (
+	"github.com/grafana/pyroscope-go"
 	"github.com/pkg/errors"
-	"github.com/pyroscope-io/client/pyroscope"
 	"github.com/skit-ai/vcore/env"
 )
 

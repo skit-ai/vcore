@@ -5,13 +5,9 @@ import (
 	"crypto/tls"
 	"fmt"
 	"net/http"
-	"os"
-	"strconv"
 	"time"
 
-	"google.golang.org/grpc"
-	"google.golang.org/grpc/credentials"
-	"google.golang.org/grpc/credentials/insecure"
+	"github.com/skit-ai/vcore/env"
 
 	"go.opentelemetry.io/otel"
 	"go.opentelemetry.io/otel/exporters/otlp/otlptrace/otlptracegrpc"
@@ -20,13 +16,16 @@ import (
 	sdktrace "go.opentelemetry.io/otel/sdk/trace"
 	semconv "go.opentelemetry.io/otel/semconv/v1.12.0"
 	"go.opentelemetry.io/otel/trace"
+	"google.golang.org/grpc"
+	"google.golang.org/grpc/credentials"
+	"google.golang.org/grpc/credentials/insecure"
 )
 
 var (
-	OtelEnable, _     = strconv.ParseBool(os.Getenv("OTEL_ENABLE"))
-	serviceName       = os.Getenv("OTEL_SERVICE_NAME")
-	collectorEndpoint = os.Getenv("OTEL_COLLECTOR_ENDPOINT")
-	useTls, _         = strconv.ParseBool(os.Getenv("OTEL_USE_TLS"))
+	OtelEnable        = env.Bool("OTEL_ENABLE", false)
+	serviceName       = env.String("OTEL_SERVICE_NAME", "")
+	collectorEndpoint = env.String("OTEL_COLLECTOR_ENDPOINT", "")
+	useTls            = env.Bool("OTEL_USE_TLS", false)
 )
 
 // Initializes an OTLP exporter, and configures the corresponding trace and
@@ -47,14 +46,14 @@ func InitProvider() (func(context.Context) error, error) {
 	ctx, cancel := context.WithTimeout(ctx, time.Second)
 	defer cancel()
 
-    opts := []grpc.DialOption{
-        grpc.WithBlock(),
-    }
-    if useTls {
-        opts = append(opts, grpc.WithTransportCredentials(credentials.NewTLS(&tls.Config{MinVersion: tls.VersionTLS12})))
-    } else {
-        opts = append(opts, grpc.WithTransportCredentials(insecure.NewCredentials()))
-    }
+	opts := []grpc.DialOption{
+		grpc.WithBlock(),
+	}
+	if useTls {
+		opts = append(opts, grpc.WithTransportCredentials(credentials.NewTLS(&tls.Config{MinVersion: tls.VersionTLS12})))
+	} else {
+		opts = append(opts, grpc.WithTransportCredentials(insecure.NewCredentials()))
+	}
 	conn, err := grpc.DialContext(ctx, collectorEndpoint, opts...)
 	if err != nil {
 		return nil, fmt.Errorf("Failed to create gRPC connection to collector: %w", err)
