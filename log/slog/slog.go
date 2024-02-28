@@ -82,7 +82,7 @@ func (l *loggerWrapper) Warn(msg string, args ...any) {
 
 // Debug logs a line with level debug using a loggerWrapper instance.
 func (l *loggerWrapper) Debug(msg string, args ...any) {
-	level.Debug(log.With(defaultLoggerWrapper.logger, defaultMsgKey, msg)).Log(args...)
+	level.Debug(log.With(l.logger, defaultMsgKey, msg)).Log(args...)
 }
 
 // Error logs a line with level error using a loggerWrapper instance.
