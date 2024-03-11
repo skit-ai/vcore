@@ -92,6 +92,38 @@ func StringToTimestamp(unixTimestamp string) (time.Time, error) {
 	return time.Unix(int64(sec), int64(dec*(1e9))), nil
 }
 
+// IncrementIntInterface takes a value and increase it by the input increment.
+// The function assumes the value is an integer and inherently of type integer or float.
+func IncrementIntInterface(val interface{}, increment int) (interface{}, error) {
+	if val != nil {
+		switch val.(type) {
+		case float64:
+			var callNumberOfConsecutiveTurns float64
+			var ok bool
+			callNumberOfConsecutiveTurns, ok = val.(float64)
+			if !ok {
+				err := errors.NewError(fmt.Sprintf("Error getting consecutive turns number as int: %v", callNumberOfConsecutiveTurns), nil, false)
+				return 0, err
+			}
+
+			val = int(callNumberOfConsecutiveTurns) + increment
+
+		case int:
+			var callNumberOfConsecutiveTurns int
+			var ok bool
+			callNumberOfConsecutiveTurns, ok = val.(int)
+			if !ok {
+				err := errors.NewError(fmt.Sprintf("Error getting consecutive turns number as int: %v", callNumberOfConsecutiveTurns), nil, false)
+				return 0, err
+			}
+
+			val = callNumberOfConsecutiveTurns + increment
+		}
+	}
+
+	return val, nil
+}
+
 // Evaluate ...
 func Evaluate(templateText string, metadata map[string]interface{}) string {
 	return evaluate(templateText, metadata, nil)
