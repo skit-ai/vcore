@@ -29,12 +29,12 @@ var static_data_key string = env.String("STATIC_DATA_KEY", "")
 var data_key []byte
 var dataKeyCache map[string][]byte = map[string][]byte{}
 
-func is_valid_base_64_string(static_data_key string) bool {
+func isValidBase64(static_data_key string) bool {
 	_, err := base64.StdEncoding.DecodeString(static_data_key)
 	return err == nil
 }
 
-func get_byte_string(static_data_key string) []byte {
+func getByteString(static_data_key string) []byte {
 	return []byte(static_data_key)
 }
 
@@ -150,8 +150,8 @@ func newCipherAESGCMObject(data_key_b64_str string, clientId string) (gcm cipher
 
 	var data_key []byte
 	// Get data key
-	if use_static_data_key && is_valid_base_64_string(static_data_key) {
-		data_key = get_byte_string(static_data_key)
+	if use_static_data_key && isValidBase64(static_data_key) {
+		data_key = getByteString(static_data_key)
 	} else {
 		data_key = getDataKey(data_key_b64_str, clientId)
 	}
