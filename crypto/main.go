@@ -10,6 +10,7 @@ import (
 
 	"github.com/hashicorp/vault/api"
 	auth "github.com/hashicorp/vault/api/auth/approle"
+	"github.com/skit-ai/vcore/env"
 )
 
 // Read Env Vars
@@ -20,11 +21,22 @@ var vault_secret_id string = os.Getenv("VAULT_SECRET_ID")
 var vault_approle_mountpath string = os.Getenv("VAULT_APPROLE_MOUNTPATH")
 var vault_data_key_name string = os.Getenv("VAULT_DATA_KEY_NAME")
 var encrypted_data_key string = os.Getenv("ENCRYPTED_DATA_KEY")
+var use_static_data_key bool = env.Bool("USE_STATIC_DATA_KEY", false)
+var static_data_key string = env.String("STATIC_DATA_KEY", "")
 
 // Other Global Variables
 
 var data_key []byte
 var dataKeyCache map[string][]byte = map[string][]byte{}
+
+func is_valid_base_64_string(static_data_key string) bool {
+	_, err := base64.StdEncoding.DecodeString(static_data_key)
+	return err == nil
+}
+
+func get_byte_string(static_data_key string) []byte {
+	return []byte(static_data_key)
+}
 
 // Vault functions
 func getApproleAuth() *auth.AppRoleAuth {
@@ -136,9 +148,13 @@ func getDataKey(encrypted_data_key_ string, clientId string) (data_key_ []byte) 
 // Crypto functions
 func newCipherAESGCMObject(data_key_b64_str string, clientId string) (gcm cipher.AEAD, err error) {
 
+	var data_key []byte
 	// Get data key
-	data_key := getDataKey(data_key_b64_str, clientId)
-
+	if use_static_data_key && is_valid_base_64_string(static_data_key) {
+		data_key = get_byte_string(static_data_key)
+	} else {
+		data_key = getDataKey(data_key_b64_str, clientId)
+	}
 	// Generate new aes cipher using our 32 byte key
 	c, err := aes.NewCipher(data_key)
 	if err != nil {
