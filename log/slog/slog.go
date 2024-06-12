@@ -30,7 +30,7 @@ var (
 
 func init() {
 	logLevel = env.String("LOG_LEVEL", "info")
-	logSensitive = env.Bool("LOG_SENSITIVE", true)
+	logSensitive = false
 	callerDepth = env.Int("LOG_CALLER_DEPTH", 4)
 	defaultLoggerWrapper = newloggerWrapper(logLevel, logSensitive)
 }
