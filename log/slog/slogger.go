@@ -14,4 +14,6 @@ type Logger interface {
 	Errorf(err error, format string, args ...any)
 	WithTraceId(ctx context.Context) Logger
 	WithFields(fields map[string]any) Logger
+	WithSensitive(bool) Logger
+	SetSensitive(val bool)
 }
