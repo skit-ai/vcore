@@ -6,7 +6,6 @@ import (
 	"crypto/aes"
 	"crypto/cipher"
 	"encoding/base64"
-	"fmt"
 	"os"
 
 	"github.com/hashicorp/vault/api"
@@ -24,7 +23,6 @@ var vault_data_key_name string = os.Getenv("VAULT_DATA_KEY_NAME")
 var encrypted_data_key string = os.Getenv("ENCRYPTED_DATA_KEY")
 var use_static_data_key bool = env.Bool("USE_STATIC_DATA_KEY", false)
 var static_data_key string = env.String("STATIC_DATA_KEY", "")
-var log_crypto_internal_info bool = env.Bool("LOG_CRYPTO_INTERNAL_INFO", false)
 
 // Other Global Variables
 
@@ -37,7 +35,8 @@ func isValidBase64(static_data_key string) bool {
 }
 
 func getByteString(static_data_key string) []byte {
-	return []byte(static_data_key)
+	data_key_, _ := base64.StdEncoding.DecodeString(static_data_key)
+	return data_key_
 }
 
 // Vault functions
@@ -156,10 +155,6 @@ func newCipherAESGCMObject(data_key_b64_str string, clientId string) (gcm cipher
 		data_key = getByteString(static_data_key)
 	} else {
 		data_key = getDataKey(data_key_b64_str, clientId)
-	}
-
-	if log_crypto_internal_info {
-		fmt.Printf("Data Key obtained - %s", data_key)
 	}
 
 	// Generate new aes cipher using our 32 byte key
