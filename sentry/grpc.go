@@ -2,6 +2,7 @@ package sentry
 
 import (
 	"context"
+	"errors"
 
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/codes"
@@ -46,9 +47,24 @@ func WithReportOn(r ReportOn) Option {
 // ReportOn decides error should be reported to sentry.
 type ReportOn func(error) bool
 
-// ReportAlways returns true if err is non-nil.
+// isContextCanceledError checks if an error is context.Canceled or derived from it
+func isContextCanceledError(err error) bool {
+	if err == context.Canceled {
+		return true
+	}
+
+	// Check if it's a gRPC Canceled error
+	if st, ok := status.FromError(err); ok && st.Code() == codes.Canceled {
+		return true
+	}
+
+	// Check if it wraps context.Canceled
+	return errors.Is(err, context.Canceled)
+}
+
+// ReportAlways returns true if err is non-nil and not a context canceled error.
 func ReportAlways(err error) bool {
-	return err != nil
+	return err != nil && !isContextCanceledError(err)
 }
 
 // ReportOnCodes returns true if error code matches on of the given codes.
