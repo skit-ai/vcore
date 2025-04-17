@@ -200,11 +200,6 @@ func (wrapper *Sentry) UnaryServerInterceptor() grpc.UnaryServerInterceptor {
 		info *grpc.UnaryServerInfo,
 		handler grpc.UnaryHandler,
 	) (resp interface{}, err error) {
-		if ctx.Err() == context.Canceled {
-			log.Warn("Context canceled while receiving data from stream")
-			return nil, status.Errorf(codes.Canceled, "Context canceled")
-		}
-
 		hub := sentry.GetHubFromContext(ctx)
 		if hub == nil {
 			hub = sentry.CurrentHub().Clone()
@@ -245,12 +240,6 @@ func (wrapper *Sentry) StreamServerInterceptor() grpc.StreamServerInterceptor {
 		handler grpc.StreamHandler,
 	) error {
 		ctx := stream.Context()
-
-		if ctx.Err() == context.Canceled {
-			log.Warn("Context canceled while receiving data from stream")
-			return status.Errorf(codes.Canceled, "Context canceled")
-		}
-
 		hub := sentry.GetHubFromContext(ctx)
 		if hub == nil {
 			hub = sentry.CurrentHub().Clone()
