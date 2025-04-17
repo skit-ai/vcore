@@ -4,11 +4,11 @@ import (
 	"context"
 	"net/http"
 	"os"
-	"strconv"
 
 	"github.com/getsentry/sentry-go"
 	sentryhttp "github.com/getsentry/sentry-go/http"
 	"github.com/julienschmidt/httprouter"
+	"github.com/skit-ai/vcore/env"
 	"github.com/skit-ai/vcore/errors"
 	"github.com/skit-ai/vcore/log"
 	sentryWrapper "github.com/skit-ai/vcore/sentry"
@@ -23,26 +23,21 @@ type Sentry struct {
 }
 
 func InitSentry(release string) (client *Sentry) {
-	dsn := os.Getenv("SENTRY_DSN")
-
-	sampleRate, _ := strconv.ParseFloat(os.Getenv("SENTRY_SAMPLING"), 64)
-
+	dsn := env.String("SENTRY_DSN", "")             // Retrieve the Sentry DSN from environment variables
+	sampleRate := env.Float("SENTRY_SAMPLING", 1.0) // Retrieve the Sentry sampling rate from environment variables, defaulting to 1.0
 	if release == "" {
-		release = os.Getenv("SENTRY_RELEASE")
+		release = env.String("SENTRY_RELEASE", "") // Retrieve the Sentry release version from environment variables if not provided
 	}
-	
-	// Parse SENTRY_TRACING environment variable
-	enableTracing := false
-	sentryTracingEnv := os.Getenv("SENTRY_TRACING")
-	if sentryTracingEnv != "" {
-		enableTracing, _ = strconv.ParseBool(sentryTracingEnv)
-	}
-	
+	// Parse SENTRY_TRACING environment variable using vcore/env to determine if tracing is enabled
+	enableTracing := env.Bool("SENTRY_TRACING", false)
+	tracesSampleRate := env.Float("SENTRY_TRACES_SAMPLE_RATE", 0.0)
+
 	if dsn != "" {
 		if err := sentry.Init(sentry.ClientOptions{
 			Dsn:              dsn,
 			AttachStacktrace: true,
 			EnableTracing:    enableTracing,
+			TracesSampleRate: tracesSampleRate,
 			// Use async transport. Which is set by default. Use Sync transport for testing.
 			//Transport: sentry.NewHTTPSyncTransport(),
 

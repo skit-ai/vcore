@@ -27,7 +27,7 @@ func (h *Handler) HandleFunc(handler http.HandlerFunc) http.HandlerFunc {
 			ctx = sentry.SetHubOnContext(ctx, hub)
 		}
 		span := sentry.StartSpan(ctx, "http.server",
-			sentry.TransactionName(fmt.Sprintf("%s %s", r.Method, r.URL.Path)),
+			sentry.WithTransactionName(fmt.Sprintf("%s %s", r.Method, r.URL.Path)),
 			sentry.ContinueFromRequest(r),
 		)
 		defer span.Finish()
@@ -79,7 +79,7 @@ func (h *Handler) HandleHttpRouter(handler httprouter.Handle) httprouter.Handle 
 			ctx = sentry.SetHubOnContext(ctx, hub)
 		}
 		span := sentry.StartSpan(ctx, "http.server",
-			sentry.TransactionName(fmt.Sprintf("%s %s", r.Method, r.URL.Path)),
+			sentry.WithTransactionName(fmt.Sprintf("%s %s", r.Method, r.URL.Path)),
 			sentry.ContinueFromRequest(r),
 		)
 		defer span.Finish()
