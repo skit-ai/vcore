@@ -30,10 +30,19 @@ func InitSentry(release string) (client *Sentry) {
 	if release == "" {
 		release = os.Getenv("SENTRY_RELEASE")
 	}
+	
+	// Parse SENTRY_TRACING environment variable
+	enableTracing := false
+	sentryTracingEnv := os.Getenv("SENTRY_TRACING")
+	if sentryTracingEnv != "" {
+		enableTracing, _ = strconv.ParseBool(sentryTracingEnv)
+	}
+	
 	if dsn != "" {
 		if err := sentry.Init(sentry.ClientOptions{
 			Dsn:              dsn,
 			AttachStacktrace: true,
+			EnableTracing:    enableTracing,
 			// Use async transport. Which is set by default. Use Sync transport for testing.
 			//Transport: sentry.NewHTTPSyncTransport(),
 
