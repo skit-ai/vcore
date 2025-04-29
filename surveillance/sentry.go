@@ -142,9 +142,8 @@ func (wrapper *Sentry) CaptureWithContext(c context.Context, err error, _panic b
 				eventID = hub.CaptureException(err)
 				if eventID != nil {
 					log.Errorf(err, "Error captured in sentry with the event ID `%s`", *eventID)
-				} else {
-					log.Error(err, "Error could not be captured in sentry due to nil event ID")
 				}
+				// NOTE: logging nil events was causing logs to be cluttered with warning logs, hence skipping.
 			} else {
 				wrapper.Capture(err, _panic)
 			}
