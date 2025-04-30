@@ -157,7 +157,11 @@ func (wrapper *Sentry) CaptureWithContext(c context.Context, err error, _panic b
 		}
 	}
 
-	return *eventID
+	if eventID != nil {
+		return *eventID
+	}
+
+	return ""
 }
 
 // Wrapper over sentry-go/http#HandleFunc
