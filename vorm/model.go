@@ -70,16 +70,16 @@ func initDBInternal(dialect string, dataSourceName string) (*Model, error) {
 }
 
 // Represents a database agnostic primary key
-type Primary uint
+type Primary int64
 
 func (x *Primary) Scan(src interface{}) error {
-	if val, ok := src.(uint); ok {
+	if val, ok := src.(int64); ok {
 		*x = Primary(val)
 	} else if val, ok := src.(float64); ok {
-		// This happens due to oracle driver not knowing that uint is required by the calling code.
-		*x = Primary(uint(val))
-	} else if val, ok := src.(int64); ok {
-		*x = Primary(uint(val))
+		// This happens due to oracle driver not knowing that int64 is required by the calling code.
+		*x = Primary(int64(val))
+	} else if val, ok := src.(uint); ok {
+		*x = Primary(int64(val))
 	}
 	// Note: This else results in errors while inserting into the table in oracle. Hence not using such a clause
 	//else {
@@ -102,16 +102,16 @@ func (x *Primary) Foreign() Foreign {
 }
 
 // Represents a database agnostic foreign key
-type Foreign uint
+type Foreign int64
 
 func (x *Foreign) Scan(src interface{}) error {
 	if val, ok := src.(uint); ok {
-		*x = Foreign(val)
+		*x = Foreign(int64(val))
 	} else if val, ok := src.(float64); ok {
 		// This happens due to oracle driver not knowing that uint is required by the calling code.
-		*x = Foreign(uint(val))
+		*x = Foreign(int64(val))
 	} else if val, ok := src.(int64); ok {
-		*x = Foreign(uint(val))
+		*x = Foreign(val)
 	}
 	// Note: This else results in errors while inserting into the table in oracle. Hence not using such a clause
 	//else {
@@ -127,6 +127,10 @@ func (x *Foreign) Value() (driver.Value, error) {
 
 func (x *Foreign) Uint() uint {
 	return uint(*x)
+}
+
+func (x *Foreign) Int64() int64 {
+	return int64(*x)
 }
 
 func (x *Foreign) Primary() Primary {
