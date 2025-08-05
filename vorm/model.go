@@ -70,20 +70,22 @@ func initDBInternal(dialect string, dataSourceName string) (*Model, error) {
 }
 
 // Represents a database agnostic primary key
-type Primary uint
+type Primary uint64
 
 func (x *Primary) Scan(src interface{}) error {
-	if val, ok := src.(uint); ok {
+	if val, ok := src.(uint64); ok {
 		*x = Primary(val)
+	} else if val, ok := src.(uint); ok {
+		*x = Primary(uint64(val))
 	} else if val, ok := src.(float64); ok {
-		// This happens due to oracle driver not knowing that uint is required by the calling code.
-		*x = Primary(uint(val))
+		// This happens due to oracle driver not knowing that uint64 is required by the calling code.
+		*x = Primary(uint64(val))
 	} else if val, ok := src.(int64); ok {
-		*x = Primary(uint(val))
+		*x = Primary(uint64(val))
 	}
 	// Note: This else results in errors while inserting into the table in oracle. Hence not using such a clause
 	//else {
-	//	return errors.New(fmt.Sprintf("Unable to convert %v to uint", src))
+	//	return errors.New(fmt.Sprintf("Unable to convert %v to uint64", src))
 	//}
 
 	return nil
@@ -97,25 +99,31 @@ func (x *Primary) Uint() uint {
 	return uint(*x)
 }
 
+func (x *Primary) Uint64() uint64 {
+	return uint64(*x)
+}
+
 func (x *Primary) Foreign() Foreign {
 	return Foreign(*x)
 }
 
 // Represents a database agnostic foreign key
-type Foreign uint
+type Foreign uint64
 
 func (x *Foreign) Scan(src interface{}) error {
-	if val, ok := src.(uint); ok {
+	if val, ok := src.(uint64); ok {
 		*x = Foreign(val)
+	} else if val, ok := src.(uint); ok {
+		*x = Foreign(uint64(val))
 	} else if val, ok := src.(float64); ok {
-		// This happens due to oracle driver not knowing that uint is required by the calling code.
-		*x = Foreign(uint(val))
+		// This happens due to oracle driver not knowing that uint64 is required by the calling code.
+		*x = Foreign(uint64(val))
 	} else if val, ok := src.(int64); ok {
-		*x = Foreign(uint(val))
+		*x = Foreign(uint64(val))
 	}
 	// Note: This else results in errors while inserting into the table in oracle. Hence not using such a clause
 	//else {
-	//	return errors.New(fmt.Sprintf("Unable to convert %v to uint", src))
+	//	return errors.New(fmt.Sprintf("Unable to convert %v to uint64", src))
 	//}
 
 	return nil
@@ -127,6 +135,10 @@ func (x *Foreign) Value() (driver.Value, error) {
 
 func (x *Foreign) Uint() uint {
 	return uint(*x)
+}
+
+func (x *Foreign) Uint64() uint64 {
+	return uint64(*x)
 }
 
 func (x *Foreign) Primary() Primary {
